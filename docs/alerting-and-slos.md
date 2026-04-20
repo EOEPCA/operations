@@ -49,7 +49,7 @@ This setup allows selected alerts to arrive in Keep, where they can be correlate
 
 In the live cluster, the `keep` `AlertmanagerConfig` sends resolved and firing alerts to:
 
-```text
+```
 http://keep-alertmanager-relay.operations.svc.cluster.local/alerts/event/prometheus
 ```
 
@@ -75,7 +75,7 @@ Burn rate is a practical way to express urgency. It shows how fast a service is 
 
 For example:
 
-```text
+```
 stac_get_latency_500ms_burn_rate_1h > 14.4
 ```
 
@@ -85,7 +85,7 @@ The burn-rate recording rule divides the observed slow-request ratio by that all
 
 For a 30-day SLO window, sustaining a `14.4` burn rate would use the whole 30-day error budget in about two days:
 
-```text
+```
 30 days / 14.4 = 2.08 days
 ```
 

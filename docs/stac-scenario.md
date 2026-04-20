@@ -12,7 +12,7 @@ The route definition is in [`argocd/eoepca/data-access/parts/route.yaml`](https:
 
 Operationally, the path looks roughly like this:
 
-```text
+```
 client
   -> APISIX route data-access_stac_stac-route
   -> eoapi-stac-auth-proxy
@@ -40,7 +40,7 @@ That is already valuable because it helps separate "the whole request is slow" f
 
 The same STAC rules also include database correlation via:
 
-```text
+```
 ccp_pg_stat_statements_total_mean_exec_time_ms{dbname="eoapi", role="eoapi"}
 ```
 
@@ -71,7 +71,7 @@ The eoepca-demo cluster has no `ServiceMonitor` objects in the `data-access` nam
 
 The `eoapi-stac` service currently exposes only port `8080` in the cluster service definition, and an in-cluster probe against:
 
-```text
+```
 http://eoapi-stac.data-access.svc.cluster.local:8080/metrics
 ```
 
