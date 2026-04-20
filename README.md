@@ -1,23 +1,19 @@
-# Operations BB
+# EOEPCA Operations Building Block
 
-The **Operations Building Block (BB)** ...
+This repository contains the documentation source for the EOEPCA Operations Building Block. Its job is to publish the Read the Docs pages and provide a small set of examples that explain why the building block exists for EO platform operators.
 
-## Getting Started with Live Code
+The deployment sources live in the [`EOEPCA/eoepca-plus`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations) repository, especially under `argocd/operations`.
 
-The [documentation section](./docs) contains notebooks preconfigured for the EOEPCA demo system to demonstrate typical user journeys...
+## Update the docs
 
-You can follow the examples locally with the steps below:
+Edit the content in [`docs/`](./docs) and verify the site locally:
 
-```
-pyenv local 3.12.11
-python --version
-uv lock --python python
-uv sync --python python --extra dev
+```bash
+uv run --with-requirements docs/requirements.txt mkdocs serve
 ```
 
-and follow the notebooks in the [Getting Started](./docs/getting-started) getting-started section.
+## Read the Docs
 
-## License
+The published documentation is available at:
 
-Apache 2.0 (Apache License Version 2.0, January 2004)
-<https://www.apache.org/licenses/LICENSE-2.0>
+<https://eoepca.readthedocs.io/projects/operations/>

@@ -6,9 +6,13 @@ edit_uri: "edit/main/docs/"
 nav:
   - EOEPCA Documentation: https://eoepca.readthedocs.io/
   - Operations:
-    - index.md
-  - Getting Started:
-      - getting-started/operator-view.ipynb
+      - Overview: index.md
+      - Basic Concepts: basic-concepts.md
+      - Monitoring Stack: monitoring-stack.md
+      - Dashboards And Usage: dashboards-and-usage.md
+      - ServiceMonitors: service-monitors.md
+      - Alerting And SLOs: alerting-and-slos.md
+      - EO platform example - STAC Scenario: stac-scenario.md
 
 theme:
   name: material
@@ -34,8 +38,6 @@ extra_css:
 plugins:
   - search
   - autorefs
-  - mkdocs-jupyter:
-      execute: false
 
 markdown_extensions:
   - tables
