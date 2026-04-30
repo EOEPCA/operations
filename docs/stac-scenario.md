@@ -59,6 +59,14 @@ The data-access deployment also includes a synthetic STAC checker:
 
 This is useful for black-box confirmation of availability and response time from an operator point of view.
 
+## How We Work With The Available Data
+
+Since we can at least differentiate between request, upstream and gateway latency, we can use Keep to enrich firing alerts with metadata from different sources. This is done by Keep's inherent workflow capability. For each SLO exists a corresponding workflow under [https://alerting.develop.eoepca.org/workflows](https://alerting.develop.eoepca.org/workflows) that is triggered automatically whenever an alert is fired.
+
+Currently, a simple analysis is performed to check whether the database, the application or the gateway is the culprit of the performance degradation. Furthermore, the current mean database latency, gateway burn rate and app burn rate is queried from Prometheus. All this information is then printed to the console together with a link to the corresponding Grafana dashboard.
+
+This way, an operator has a clear picture of the most important metrics and components of an alert. In the future, this information will be used to perform automatic remediation playbooks to enable self-healing mechanisms.
+
 ## Current Shortcomings
 
 The main observability gap is at the native application layer.
