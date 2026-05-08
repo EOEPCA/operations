@@ -9,10 +9,10 @@ nav:
       - Overview: index.md
       - Basic Concepts: basic-concepts.md
       - Monitoring Stack: monitoring-stack.md
-      - Dashboards And Usage: dashboards-and-usage.md
+      - Dashboards and Usage: dashboards-and-usage.md
       - ServiceMonitors: service-monitors.md
-      - Alerting And SLOs: alerting-and-slos.md
-      - EO platform example - STAC Scenario: stac-scenario.md
+      - Alerting and SLOs: alerting-and-slos.md
+      - STAC Scenario: stac-scenario.md
 
 theme:
   name: material

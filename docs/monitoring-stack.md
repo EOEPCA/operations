@@ -1,34 +1,21 @@
 # Monitoring Stack
 
-This page describes what is deployed today for the EOEPCA demo operations stack and how the pieces fit together.
+This page describes the operations stack deployed for the EOEPCA demo environment and how the pieces fit together. The deployment sources live in [`eoepca-plus/argocd/operations`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations).
 
 ## Deployed Components
 
-The `operations` namespace in the eoepca-demo cluster includes these main components:
+The `operations` namespace contains the operator-facing monitoring and alerting stack:
 
 | Component | Purpose | Deployment source |
 | --- | --- | --- |
-| Prometheus | Scrapes metrics and evaluates rules | [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/2473e90aad88ef76de8cbd947b124e404fb1281b/argocd/operations/monitoring/app-kube-prometheus-stack.yaml#L71-L82) |
-| Grafana | Dashboards and exploration UI | [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/2473e90aad88ef76de8cbd947b124e404fb1281b/argocd/operations/monitoring/app-kube-prometheus-stack.yaml#L17-L60) |
-| Alertmanager | Alert routing and grouping | [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/2473e90aad88ef76de8cbd947b124e404fb1281b/argocd/operations/monitoring/app-kube-prometheus-stack.yaml#L65-L69) |
+| Prometheus | Scrapes metrics and evaluates recording and alerting rules | [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-kube-prometheus-stack.yaml) |
+| Grafana | Dashboards and metric/log exploration | [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-kube-prometheus-stack.yaml) |
+| Alertmanager | Alert grouping, routing, and deduplication | [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-kube-prometheus-stack.yaml) |
 | Loki | Log storage and querying | [`app-loki-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-loki-stack.yaml) |
-| Grafana Alloy | Log collection from Kubernetes pods | [`app-alloy-logs.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-alloy-logs.yaml) |
-| Loki Canary | Synthetic log path checks for Loki ingestion and querying | [`app-loki-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-loki-stack.yaml) |
-| Keep | Alert enrichment and operator workflow UI | [`app-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/app-keep.yaml) |
+| Grafana Alloy | Pod log discovery and forwarding to Loki | [`app-alloy-logs.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-alloy-logs.yaml) and [`config.alloy`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/alloy/config.alloy) |
+| Keep | Alert enrichment and triage UI | [`app-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/app-keep.yaml) |
 | Keep OAuth2 Proxy | Access control and proxying for Keep | [`app-keep-oauth2-proxy.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/app-keep-oauth2-proxy.yaml) |
-
-## Current Cluster Snapshot
-
-The live `operations` namespace is healthy at workload level:
-
-- Prometheus `v3.11.1` and Alertmanager `v0.31.1` are both reconciled and available
-- Grafana `12.4.2`, kube-state-metrics `v2.18.0`, and Prometheus Operator `v0.90.1` are running
-- Alloy runs as a four-pod DaemonSet using `grafana/alloy:v1.12.1`
-- Loki runs as a single-binary StatefulSet using `grafana/loki:3.6.7`, with four Loki canary pods
-- Keep backend and frontend run on `0.49.0`
-- Prometheus has a bound `50Gi` PVC and Keep has a bound `5Gi` PVC
-
-The owning Argo CD applications for the operations stack were also synced and healthy: `alloy-logs`, `keep`, `keep-oauth2-proxy`, `kube-prometheus-stack`, and `loki-stack`.
+| Keep relay | Internal bridge from Alertmanager webhooks to Keep | [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/keep-alertmanager-relay.yaml) |
 
 ## What Each Component Does
 
@@ -40,7 +27,7 @@ Prometheus is the core metrics engine. In the EOEPCA demo it:
 - evaluates baseline and STAC-specific rules
 - stores time series for dashboards and alerting
 
-The current deployment keeps 30 days of retention and persists data on a PVC. See the values in [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/2473e90aad88ef76de8cbd947b124e404fb1281b/argocd/operations/monitoring/app-kube-prometheus-stack.yaml#L73-L82).
+The retention and persistence settings are defined in [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/app-kube-prometheus-stack.yaml).
 
 ### Grafana
 
@@ -67,7 +54,6 @@ Loki stores logs collected from Kubernetes pods. The current deployment uses:
 
 - a single-binary Loki setup
 - object storage on S3-compatible backend
-- a 168 hour retention period
 - a chart-managed ServiceMonitor for Loki metrics
 - Loki canaries to exercise the log pipeline
 
@@ -96,7 +82,7 @@ The demo currently exposes:
 - Grafana at <https://monitoring.develop.eoepca.org>, requiring a `monitoring:grafana-admin`, `monitoring:grafana-editor`, or `monitoring:grafana-viewer` role in Keycloak
 - Keep at <https://alerting.develop.eoepca.org>, requiring an `alerting:keep-admin` or `alerting:keep-noc` role in Keycloak
 
-These endpoints are exposed through APISIX routes, not OpenShift `Route` objects. The routing manifests are here:
+These endpoints are exposed through APISIX routes:
 
 - [`monitoring/routes.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/monitoring/routes.yaml)
 - [`alerting/routes.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/routes.yaml)

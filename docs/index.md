@@ -2,14 +2,14 @@
 
 The EOEPCA Operations Building Block exists to make EO platform services observable and operable in a consistent way. The goal is not to invent a new monitoring stack, but to show how common open-source components can be combined into an operator workflow for EO platform services.
 
-This documentation is intentionally split into a few focused pages:
+This documentation is split into a few focused pages:
 
 - [Basic Concepts](basic-concepts.md) explains metrics, logs, alerts, and SLOs at a high level
 - [Monitoring Stack](monitoring-stack.md) describes what is deployed today in the EOEPCA demo environment
-- [Dashboards And Usage](dashboards-and-usage.md) walks through the dashboards we already ship and how operators use them
-- [ServiceMonitors](service-monitors.md) explains why they matter and what they enable
-- [Alerting And SLOs](alerting-and-slos.md) connects Prometheus, Alertmanager, Keep, and SLO-driven operations
-- [EO Platform Scenario](stac-scenario.md) grounds the BB in an EO platform STAC use case and highlights current observability shortcomings
+- [Dashboards and Usage](dashboards-and-usage.md) walks through the dashboards we already ship and how operators use them
+- [ServiceMonitors](service-monitors.md) explains why scrape targets matter and what they enable
+- [Alerting and SLOs](alerting-and-slos.md) connects Prometheus, Alertmanager, Keep, and SLO-driven operations
+- [STAC Scenario](stac-scenario.md) grounds the building block in a real EO platform path and highlights the need for application-specific metrics
 
 ## Deployment Sources
 

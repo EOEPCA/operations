@@ -1,18 +1,16 @@
 # STAC Scenario
 
-The STAC path is a good concrete example for the Operations Building Block because it is directly relevant to EO platform operators. If STAC is slow or failing, catalogue access and discovery suffer immediately.
+The STAC path is the clearest EO platform example for the Operations Building Block. If catalogue search or item access is slow, users and downstream building blocks feel it quickly.
 
-## Current STAC Path
+## Request Path
 
 In the demo environment, the public STAC endpoint is:
 
 - <https://eoapi.develop.eoepca.org/stac>
 
-The route definition is in [`argocd/eoepca/data-access/parts/route.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/route.yaml).
+The public route is defined in [`argocd/eoepca/data-access/parts/route.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/route.yaml). For the main STAC path, traffic flows through:
 
-Operationally, the path looks roughly like this:
-
-```
+```text
 client
   -> APISIX route data-access_stac_stac-route
   -> eoapi-stac-auth-proxy
@@ -20,78 +18,73 @@ client
   -> PostgreSQL / pgSTAC
 ```
 
-## What We Can Observe Today
+This is a useful scenario because a single symptom can come from several layers: gateway routing, authorisation and filtering, the STAC application, or the database.
 
-The demo environment already gives operators several useful signals for this path.
+## What is Observable Today
 
-### Gateway Metrics
+The current demo has enough signals to detect STAC degradation and narrow down the likely layer.
 
-The STAC alert rules in [`_rules/stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/stac-alerts.yaml) use APISIX metrics for the route `data-access_stac_stac-route`.
+### APISIX Route Metrics
 
-Those rules distinguish between:
+APISIX metrics are scraped through the ServiceMonitor in `ingress-apisix`. The STAC rules in [`_rules/stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/stac-alerts.yaml) use the stable APISIX route label `data-access_stac_stac-route`.
 
-- request latency as seen by the client-facing route
-- upstream application latency
-- APISIX gateway latency
+The rule file records burn rates for three views of latency:
 
-That is already valuable because it helps separate "the whole request is slow" from "the gateway layer is slow" and "the upstream service is slow".
+- request latency, which is what the client-facing route experiences
+- upstream latency, which points toward the proxied application path
+- APISIX gateway latency, which points toward the gateway layer itself
+
+The alerting rules currently fire on the request-latency GET and POST records. The upstream and gateway records support diagnosis after an alert fires.
+
+### STAC SLO Dashboard
+
+The curated STAC dashboard is deployed from [`_dashboards/stac-slo.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_dashboards/stac-slo.json). It is built from the same recording rules and shows the route, GET and POST burn rates, gateway and upstream views, and database latency.
 
 ### Database Metrics
 
-The same STAC rules also include database correlation via:
+The STAC rules include a database correlation record based on PostgreSQL exporter data:
 
-```
-ccp_pg_stat_statements_total_mean_exec_time_ms{dbname="eoapi", role="eoapi"}
+```promql
+avg(ccp_pg_stat_statements_total_mean_exec_time_ms{dbname="eoapi", role="eoapi"})
 ```
 
-That gives a PostgreSQL-side view which can help explain whether backend query execution is contributing to the symptom.
+This does not explain every STAC problem, but it gives operators a database-side signal when the route is slow.
 
 ### Logs
 
-Alloy collects Kubernetes pod logs and forwards them to Loki. Because the Alloy configuration discovers pod logs across the cluster, STAC-related workloads in `data-access` can still be investigated through logs even when native application metrics are missing.
+Grafana Alloy collects Kubernetes pod logs and forwards them to Loki. STAC-related workloads in `data-access` can therefore be investigated through logs even when the application does not expose native Prometheus metrics.
 
 ### Synthetic Checks
 
-The data-access deployment also includes a synthetic STAC checker:
+The data-access deployment includes a synthetic STAC checker:
 
 - [`deployment-synthetic-api-check.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/deployment-synthetic-api-check.yaml)
 - [`check-stac.sh`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/synthetic-api-check/check-stac.sh)
 
-This is useful for black-box confirmation of availability and response time from an operator point of view.
+This gives operators a black-box view of whether the public STAC endpoint responds from the outside of the application.
 
-## How We Work With The Available Data
+## How Operators Use These Signals
 
-Since we can at least differentiate between request, upstream and gateway latency, we can use Keep to enrich firing alerts with metadata from different sources. This is done by Keep's inherent workflow capability. For each SLO exists a corresponding workflow under [https://alerting.develop.eoepca.org/workflows](https://alerting.develop.eoepca.org/workflows) that is triggered automatically whenever an alert is fired.
+A practical STAC incident flow is:
 
-Currently, a simple analysis is performed to check whether the database, the application or the gateway is the culprit of the performance degradation. Furthermore, the current mean database latency, gateway burn rate and app burn rate is queried from Prometheus. All this information is then printed to the console together with a link to the corresponding Grafana dashboard.
+1. A STAC burn-rate alert fires from [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/stac-alerts.yaml).
+2. Alertmanager forwards the alert to Keep through [`alertmanagerconfig-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/alertmanagerconfig-keep.yaml) and [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/keep-alertmanager-relay.yaml).
+3. The operator opens the STAC SLO dashboard to compare request, upstream, gateway, and database signals.
+4. If the issue looks application-related, the operator checks the `eoapi-stac` and `eoapi-stac-auth-proxy` pods, logs, and surrounding Kubernetes resource dashboards.
+5. If the issue looks database-related, the operator follows the PostgreSQL exporter signal and `pg_stat_statements`-derived timing.
 
-This way, an operator has a clear picture of the most important metrics and components of an alert. In the future, this information will be used to perform automatic remediation playbooks to enable self-healing mechanisms.
+The current setup is good at showing that the STAC path is at risk and at separating some broad layers. It is weaker at explaining application-internal behaviour.
 
-## Current Shortcomings
+## Main Gap: Application-Specific Metrics
 
-The main observability gap is at the native application layer.
+The original STAC scenario showed a strong need for application-specific metrics. Today there are no `ServiceMonitor` objects in the `data-access` namespace, and in-cluster checks against both application endpoints return `404` for `/metrics`:
 
-### No ServiceMonitors In `data-access`
-
-The eoepca-demo cluster has no `ServiceMonitor` objects in the `data-access` namespace. Current ServiceMonitors are present in `operations`, `ingress-apisix`, and `infra`, but not for `eoapi` workloads.
-
-### `eoapi-stac` Does Not Expose A Working Prometheus Endpoint
-
-The `eoapi-stac` service currently exposes only port `8080` in the cluster service definition, and an in-cluster probe against:
-
-```
+```text
 http://eoapi-stac.data-access.svc.cluster.local:8080/metrics
+http://eoapi-stac-auth-proxy.data-access.svc.cluster.local:8080/metrics
 ```
 
-returns `404`.
-
-That does not mean the service is invisible. Because the workload is containerised and runs on Kubernetes, the platform still exposes useful signals around it: pod health, restarts, CPU, memory, network traffic, logs, gateway timings, and database exporter metrics. Those signals already support many operational questions.
-
-The missing piece is application-native instrumentation from `eoapi-stac` itself. For the main STAC application path, there is currently no usable Prometheus metrics endpoint at `/metrics` that exposes STAC-specific behaviour from inside the application.
-
-### Consequence For Operators
-
-Because of that gap, operators can observe STAC mostly from the outside and from surrounding platform layers:
+That means operators mainly infer STAC behaviour from surrounding layers:
 
 - APISIX request and upstream timings
 - Kubernetes pod health, restarts, and resource usage
@@ -99,33 +92,27 @@ Because of that gap, operators can observe STAC mostly from the outside and from
 - logs
 - synthetic checks
 
-That is already useful for detecting symptoms and narrowing down the affected layer. What operators cannot yet observe directly from `eoapi-stac` is application-specific behaviour such as:
+APISIX can separate GET and POST traffic, but it cannot see the STAC operation semantics inside those requests. From the outside, modification requests and search requests are both POST requests. GET requests have a similar problem: a single item lookup, a large collection or item listing, and a simple HTTP probe can all look like GET traffic on the same public route.
 
-- handler-level request counters and error classes
-- app-native latency histograms
-- cache behaviour
-- auth or filter decisions inside the STAC application path
-- internal queue, worker, or database-pool behaviour
+Those signals are valuable, but they do not expose application decisions. Useful native metrics could be added to `eoapi-stac`, `eoapi-stac-auth-proxy`, or both. Examples include request counters and latency histograms by route template, method, operation, status class, and outcome; auth and filtering decisions in the proxy; cache behaviour; and database-pool or worker saturation inside the STAC application.
 
-## Why This Matters
+## Why Not Use Full URLs From APISIX?
 
-The current setup is already useful for detecting that STAC quality is degrading. It is weaker at explaining exactly why the application behaved that way.
+One early idea was to scrape or label full URLs at APISIX to recover more STAC detail from gateway metrics. That quickly runs into high-cardinality problems.
 
-That is an important distinction:
+High cardinality means a metric has too many distinct label value combinations. In Prometheus, each unique combination becomes a separate time series. If a label contains full URLs, item IDs, collection IDs, user IDs, or query strings, the number of time series can grow quickly and churn constantly. That increases memory use, storage cost, and query latency, and it can make alerts less reliable.
 
-- the Operations BB is already able to detect user-visible risk
-- the next maturity step is better service-native instrumentation
+The current APISIX configuration in [`infra/apisix/parts/values/apisix-values.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/apisix/parts/values/apisix-values.yaml) keeps the useful low-cardinality dimensions, such as route and HTTP method. For deeper STAC insight, the safer pattern is application-native metrics with controlled labels.
 
-## What Would Improve The Situation
+## Better End State
 
-The natural next step would be to instrument `eoapi` and related components so that operators can scrape them directly.
+The next maturity step is to instrument the STAC application path directly:
 
-That would ideally include:
+- expose a Prometheus-compatible metrics endpoint in `eoapi-stac`
+- expose proxy-specific metrics from `eoapi-stac-auth-proxy` if authorisation and filtering behaviour needs to be operated separately
+- add stable labels and a `ServiceMonitor` for each metrics endpoint
+- extend the STAC dashboard and alerts with native application metrics
 
-- a Prometheus-compatible metrics endpoint in `eoapi-stac`
-- stable service labels and a `ServiceMonitor`
-- a similar decision for `eoapi-stac-auth-proxy` if its behaviour is operationally relevant
-- EO platform dashboards for STAC based on native application metrics
-- alerts that combine gateway, application, and database views more explicitly
+With that in place, the Operations BB can move from "the STAC path is slow" toward "this specific layer of the STAC application path is responsible".
 
-Once that exists, the Operations BB can support a much stronger STAC operating model: not only "the path is slow", but also "which layer inside the STAC service is responsible".
+Remediation can then be introduced carefully. In the STAC case, that might remain a manual runbook, become a script for common mitigations, follow a decision tree, or use an agent-assisted workflow. The key requirement is the same in every case: the operator must be able to trace the recommendation, approval, action, and outcome.
