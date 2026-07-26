@@ -1,6 +1,9 @@
-# STAC Scenario
+# End-to-End Example: STAC Service Path
 
-The STAC path is the clearest EO platform example for the Operations Building Block. If catalogue search or item access is slow, users and downstream building blocks feel it quickly.
+This page applies the Operations Building Block operating model end to end to
+a synchronous HTTP request/response path. The STAC example connects a
+user-visible request to the gateway, authorisation proxy, application, and
+database layers that must cooperate to serve it.
 
 ## Request Path
 
@@ -18,11 +21,14 @@ client
   -> PostgreSQL / pgSTAC
 ```
 
-This is a useful scenario because a single symptom can come from several layers: gateway routing, authorisation and filtering, the STAC application, or the database.
+This example is useful because one symptom can come from several layers:
+gateway routing, authorisation and filtering, the STAC application, or the
+database.
 
 ## What is Observable Today
 
-The current demo has enough signals to detect STAC degradation and narrow down the likely layer.
+The current demo has enough signals to detect STAC degradation and identify
+the likely layer.
 
 ### APISIX Route Metrics
 
@@ -61,19 +67,74 @@ The data-access deployment includes a synthetic STAC checker:
 - [`deployment-synthetic-api-check.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/deployment-synthetic-api-check.yaml)
 - [`check-stac.sh`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/synthetic-api-check/check-stac.sh)
 
-This gives operators a black-box view of whether the public STAC endpoint responds from the outside of the application.
+This checks whether the public STAC endpoint responds from outside the
+application.
 
-## How Operators Use These Signals
+## Inspect, Investigate, and Act
+
+The current STAC setup already supports much of Inspect and provides evidence
+for a human-led Investigate. The
+[remediation-action library](remediation-actions.md) currently being
+established is the next step needed to complete Act.
+
+### Inspect
 
 A practical STAC incident flow is:
 
 1. A STAC burn-rate alert fires from [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/stac-alerts.yaml).
 2. Alertmanager forwards the alert to Keep through [`alertmanagerconfig-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/alertmanagerconfig-keep.yaml) and [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/keep-alertmanager-relay.yaml).
-3. The operator opens the STAC SLO dashboard to compare request, upstream, gateway, and database signals.
-4. If the issue looks application-related, the operator checks the `eoapi-stac` and `eoapi-stac-auth-proxy` pods, logs, and surrounding Kubernetes resource dashboards.
-5. If the issue looks database-related, the operator follows the PostgreSQL exporter signal and `pg_stat_statements`-derived timing.
 
-The current setup is good at showing that the STAC path is at risk and at separating some broad layers. It is weaker at explaining application-internal behaviour.
+Inspect should present these as one service incident: the affected STAC
+operation, observed latency or errors, SLO impact, correlated gateway and
+dependency signals, and links to the evidence.
+
+### Investigate
+
+The operator opens the STAC SLO dashboard to compare request, upstream,
+gateway, and database signals.
+
+- If the issue looks application-related, the operator checks the `eoapi-stac`
+  and `eoapi-stac-auth-proxy` pods, logs, and surrounding Kubernetes resource
+  dashboards.
+- If the issue looks database-related, the operator follows the PostgreSQL
+  exporter signal and `pg_stat_statements`-derived timing.
+- Recent Flux and deployment changes are useful evidence, but are not treated
+  as the cause without supporting observations.
+
+The current setup shows when the STAC path is at risk and helps separate the
+main layers. It gives less detail about behaviour inside the application.
+
+### Act and Verify
+
+Once the operator has enough evidence, a remediation library should offer only
+actions that are appropriate for the affected layer. STAC actions could
+include:
+
+- reconcile the relevant Flux source or release
+- restart a stateless STAC workload
+- scale a stateless workload within predefined limits
+- enable a predefined rate-limiting profile
+- open a GitOps change for a durable correction
+
+These actions are proposals and are not yet part of the current demo.
+Production changes require human approval.
+
+Verify then repeats the important checks:
+
+- did the workload reach a healthy state?
+- does the public STAC request succeed?
+- did latency or the error rate return to the expected range?
+- did recovery remain stable rather than immediately regress?
+
+If verification fails, the operator returns to Investigate or escalates instead
+of treating command completion as recovery.
+
+### Learn
+
+After recovery, the team records what was missing or misleading, whether the
+chosen action helped, and what would make the next incident easier. This may
+lead to better STAC metrics, SLOs, dashboards, investigation guidance, action
+preconditions, or verification checks.
 
 ## Main Gap: Application-Specific Metrics
 
@@ -84,7 +145,7 @@ http://eoapi-stac.data-access.svc.cluster.local:8080/metrics
 http://eoapi-stac-auth-proxy.data-access.svc.cluster.local:8080/metrics
 ```
 
-That means operators mainly infer STAC behaviour from surrounding layers:
+Operators must therefore infer STAC behaviour from surrounding layers:
 
 - APISIX request and upstream timings
 - Kubernetes pod health, restarts, and resource usage
@@ -106,13 +167,17 @@ The current APISIX configuration in [`infra/apisix/parts/values/apisix-values.ya
 
 ## Better End State
 
-The next maturity step is to instrument the STAC application path directly:
+The next step is to add metrics directly to the STAC application path:
 
 - expose a Prometheus-compatible metrics endpoint in `eoapi-stac`
 - expose proxy-specific metrics from `eoapi-stac-auth-proxy` if authorisation and filtering behaviour needs to be operated separately
 - add stable labels and a `ServiceMonitor` for each metrics endpoint
 - extend the STAC dashboard and alerts with native application metrics
 
-With that in place, the Operations BB can move from "the STAC path is slow" toward "this specific layer of the STAC application path is responsible".
+With that in place, the Operations BB can move from "the STAC path is slow"
+toward "this specific layer of the STAC application path is contributing to the
+degradation".
 
-Remediation can then be introduced carefully. In the STAC case, that might remain a manual runbook, become a script for common mitigations, follow a decision tree, or use an agent-assisted workflow. The key requirement is the same in every case: the operator must be able to trace the recommendation, approval, action, and outcome.
+The next step is to connect that evidence to the remediation-action library.
+The operator must be able to trace the evidence, decision, approval, action,
+verification, and outcome.

@@ -1,6 +1,8 @@
 # Alerting and SLOs
 
-The Operations BB is not only about collecting data. It is about making that data actionable for operators.
+Alerting and SLOs are central to **Inspect** in the
+[operating model](operating-model.md). They turn raw telemetry into a clear
+signal that a user-facing service may need operator attention.
 
 ## Prometheus, Alertmanager, and Keep
 
@@ -45,7 +47,8 @@ In the EOEPCA demo, Keep is integrated through:
 - [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/keep-alertmanager-relay.yaml)
 - [`app-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/app-keep.yaml)
 
-This setup allows selected alerts to arrive in Keep, where they can be correlated with additional operational context. The value is not only visibility. The value is reducing the time between "alert fired" and "operator knows what to inspect next".
+Selected alerts arrive in Keep with related operational context. This shortens
+the time between "alert fired" and "operator knows what to inspect next".
 
 In the live cluster, the `keep` `AlertmanagerConfig` sends resolved and firing alerts to:
 
@@ -57,7 +60,7 @@ Selected noisy workload alerts are routed to a `null` receiver before the defaul
 
 ## SLOs
 
-SLOs move alerting closer to user-visible service quality.
+SLOs focus alerting on user-visible service quality.
 
 Instead of saying:
 
@@ -81,7 +84,9 @@ stac_get_latency_500ms_burn_rate_1h > 14.4
 
 In the current STAC latency rules, the objective is effectively "99% of requests should complete within 500 ms". That leaves a 1% latency error budget: up to 1% of requests may be slower than 500 ms before the objective is missed.
 
-The burn-rate recording rule divides the observed slow-request ratio by that allowed 1% budget. A burn rate of `1` means the service is consuming the budget exactly as fast as the objective allows. A burn rate of `14.4` means it is consuming the budget 14.4 times faster than allowed.
+The burn-rate rule divides the observed slow-request ratio by the allowed 1%
+budget. A burn rate of `1` means the service is using the budget at the allowed
+rate. A burn rate of `14.4` means it is using the budget 14.4 times faster.
 
 For a 30-day SLO window, sustaining a `14.4` burn rate would use the whole 30-day error budget in about two days:
 
@@ -107,13 +112,30 @@ EO platform operators care about service paths such as STAC, not only about whet
 
 This is the core idea of the Operations BB:
 
-- metrics and logs provide signals
-- Prometheus and Alertmanager detect and route problems
-- Keep enriches the event
-- SLOs tell operators what matters most
+- metrics, synthetics, and SLOs detect a meaningful service symptom
+- Prometheus and Alertmanager evaluate, group, and route the signal
+- Keep enriches the event for investigation
+- supporting metrics and logs help the operator narrow the failure domain
 
-## Outlook: Remediation
+Together, these components perform much of Inspect and prepare Investigate.
 
-The same operating model can later support remediation. Remediation does not have to mean a fully autonomous system from the beginning. It can start as a manual operator action linked from an alert, then grow into scripts, decision trees, or agent-assisted workflows.
+## From Alerting to Remediation
 
-The important constraint is transparency. Operators must be able to see why a remediation path was suggested, what inputs were used, what action was taken, who or what approved it, and what changed afterwards. Whether the action is manual or automated, the result should be traceable enough to support audit, review, rollback, and learning from incidents.
+An alert should lead to an appropriate response.
+
+After **Inspect** raises and enriches the incident, a human operator owns
+**Investigate**. The operator uses the prepared signals to decide what is
+likely wrong, what remains uncertain, and which mitigation is safe.
+
+Act should then use the
+[library of named remediation actions](remediation-actions.md) currently being
+established. The library turns existing scripts and procedures into trusted
+operational choices while keeping approval and verification explicit.
+
+Verify completes the action by checking workload health and the user-facing
+service again. If the same synthetic check or SLO remains unhealthy, the action
+did not solve the incident and the flow returns to Investigate.
+
+After recovery, Learn uses the incident record to improve alerts, dashboards,
+investigation guidance, remediation actions, and verification for the next
+incident.

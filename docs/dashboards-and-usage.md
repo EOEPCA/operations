@@ -1,12 +1,16 @@
 # Dashboards and Usage
 
-The EOEPCA demo ships curated Grafana dashboards for the monitoring system, Kubernetes resources, and the STAC SLO scenario.
+The EOEPCA demo ships curated Grafana dashboards for the monitoring system,
+Kubernetes resources, and the STAC SLO scenario. In the
+[operating model](operating-model.md), dashboards turn Inspect signals into
+evidence an operator can use during Investigate.
 
 ## How Dashboards Are Provisioned
 
 The dashboards are generated as ConfigMaps under [`argocd/operations/_dashboards`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations/_dashboards) and labeled with `grafana_dashboard: "1"`.
 
-That matters because it lets Grafana pick them up automatically as managed dashboards, without manual imports.
+Grafana loads them automatically as managed dashboards, so no manual import is
+needed.
 
 The live `operations` namespace contains dashboard ConfigMaps for:
 
@@ -31,7 +35,7 @@ This dashboard helps operators understand whether the monitoring system itself i
 - query rate
 - Prometheus storage state
 
-This is usually the first place to look when monitoring results seem incomplete or suspicious.
+Start here when monitoring results look incomplete or wrong.
 
 ### Kubernetes / Cluster
 
@@ -40,10 +44,11 @@ Source: [`k8s-resources-cluster.json`](https://github.com/EOEPCA/eoepca-plus/blo
 This dashboard is useful for answering questions like:
 
 - which namespaces are consuming most CPU or memory?
-- how close is the cluster to requests and limits commitment?
+- how much cluster capacity is committed through resource requests and limits?
 - where is network or storage activity concentrated?
 
-It is a good starting point when an operator knows the platform is unhealthy, but not yet which namespace or workload is involved.
+Start here when the platform is unhealthy but the affected namespace or
+workload is not yet known.
 
 ### Kubernetes / Workload
 
@@ -56,13 +61,14 @@ This dashboard focuses on pods and containers. It helps answer:
 - how does memory working set compare to requests and limits?
 - is network or disk activity unusual for this pod?
 
-For incident response, this is often the next drill-down after identifying the relevant namespace.
+Use this after finding the relevant namespace.
 
 ### Kubernetes / Node
 
 Source: [`k8s-resources-node.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_dashboards/k8s-resources-node.json)
 
-This dashboard shifts the view to the node level. It is useful when the issue looks like cluster saturation, scheduling pressure, or a node-local problem rather than a single application fault.
+This dashboard shows node-level data. Use it for cluster saturation, scheduling
+pressure, or a node problem rather than a single application fault.
 
 ### STAC / SLO
 
@@ -88,4 +94,7 @@ A practical operator workflow often looks like this:
 
 ## EO Platform Dashboards
 
-The STAC dashboard is intentionally built from the metrics available today. It is useful for gateway, upstream, and database correlation, but the [STAC Scenario](stac-scenario.md) explains why application-native metrics would make it much stronger.
+The STAC dashboard is intentionally built from the metrics available today. It
+is useful for gateway, upstream, and database correlation, but the
+[end-to-end STAC example](stac-scenario.md) explains why application-native
+metrics would make it much stronger.

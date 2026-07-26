@@ -1,27 +1,41 @@
 # Operations Building Block
 
-The EOEPCA Operations Building Block exists to make EO platform services observable and operable in a consistent way. The goal is not to invent a new monitoring stack, but to show how common open-source components can be combined into an operator workflow for EO platform services.
+The EOEPCA Operations Building Block turns evidence of service problems into
+safe, verified action and learning.
 
-This documentation is split into a few focused pages:
+![The EOEPCA operating model moves from Inspect to Investigate and Act. Verify completes Act, and Learn improves the next response.](img/operating-model.svg){ .operations-model }
 
-- [Basic Concepts](basic-concepts.md) explains metrics, logs, alerts, and SLOs at a high level
-- [Monitoring Stack](monitoring-stack.md) describes what is deployed today in the EOEPCA demo environment
-- [Dashboards and Usage](dashboards-and-usage.md) walks through the dashboards we already ship and how operators use them
-- [ServiceMonitors](service-monitors.md) explains why scrape targets matter and what they enable
-- [Alerting and SLOs](alerting-and-slos.md) connects Prometheus, Alertmanager, Keep, and SLO-driven operations
-- [STAC Scenario](stac-scenario.md) grounds the building block in a real EO platform path and highlights the need for application-specific metrics
+Start with the [Operating Model](operating-model.md) to learn what each stage
+means. The concept pages explain the evidence used during
+[Inspect and Investigate](basic-concepts.md) and the
+[remediation actions](remediation-actions.md) used during Act.
+
+## Documentation
+
+The documentation is organised from concepts to implementation:
+
+- **Foundations** defines the operating model, observability basics, and the
+  remediation-action concept.
+- **Current Implementation** describes the monitoring, dashboard, scraping,
+  alerting, and SLO capabilities deployed in the EOEPCA demo.
+- **End-to-End Example** applies the complete model to the STAC service path.
 
 ## Deployment Sources
 
-The deployment sources for the demo environment are maintained in [`eoepca-plus/argocd/operations`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations). This repository focuses on explanation and documentation, while the operational manifests live there.
+The deployment sources for the demo environment are in
+[`eoepca-plus/argocd/operations`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations).
+This repository contains the documentation.
 
 ## Why This Matters
 
-EO platforms are made of multiple services, gateways, databases, and background components. When those parts expose signals in inconsistent ways, operators lose time during incident response.
+EO platforms contain many services, gateways, databases, and background
+components. Operators lose time when these parts expose different or unclear
+signals.
 
 The Operations BB helps standardise the operational model so that platform teams can:
 
-- observe service behaviour through common signals
-- build dashboards and alerts on top of those signals
+- detect service degradation through common signals
+- prepare evidence and context for investigation
 - reason about user-facing service quality through SLOs
-- enrich alerts with enough context to support mitigation
+- choose from known remediation actions instead of ad hoc commands
+- verify recovery and improve the response after each incident

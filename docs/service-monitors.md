@@ -12,11 +12,14 @@ A `ServiceMonitor` turns a metrics endpoint into a managed scrape target. Once i
 - alert on them
 - include them in SLO calculations
 
-Without that wiring, metrics may exist but remain operationally invisible.
+Without this connection, metrics may exist but Prometheus cannot use them.
 
 ## Why the Operations BB Uses Them
 
-The Operations BB prefers declarative discovery over ad hoc scrape configuration because it scales better across teams and services. A component that exposes a stable metrics endpoint and ships its own `ServiceMonitor` is much easier to integrate into a common platform baseline.
+The Operations BB uses `ServiceMonitor` resources instead of hand-written
+scrape settings. This is easier to manage across teams and services. A
+component with a stable metrics endpoint and its own `ServiceMonitor` is easier
+to add to the platform baseline.
 
 ## What is Scraped Today
 
@@ -62,7 +65,10 @@ Because that pattern is in place, operators can correlate STAC symptoms with dat
 
 ## Metric Quality Matters Too
 
-A scrape target is only useful when the metric labels are stable enough for Prometheus. For example, APISIX route metrics are useful because they expose bounded labels such as route and HTTP method. The APISIX metric labels are configured in [`infra/apisix/parts/values/apisix-values.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/apisix/parts/values/apisix-values.yaml).
+A scrape target is only useful when its metric labels are stable. For example,
+APISIX route metrics use controlled labels such as route and HTTP method. The
+labels are configured in
+[`infra/apisix/parts/values/apisix-values.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/apisix/parts/values/apisix-values.yaml).
 
 The STAC scenario originally showed a strong need for application-specific metrics. Trying to derive that detail at the gateway by adding a full URL label creates high cardinality: every distinct path, query, or identifier becomes another time series. That increases Prometheus memory, storage, and query cost, especially when values churn quickly.
 
@@ -87,4 +93,5 @@ When a service does not expose native metrics or does not ship a `ServiceMonitor
 - logs
 - synthetic checks
 
-Those signals are still useful, but they do not replace native application metrics. They usually tell operators that a path is slow or failing, but not enough about why the service itself behaved that way.
+Those signals are still useful, but they do not replace native application
+metrics. They can show that a path is slow or failing, but often not why.

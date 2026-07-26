@@ -7,12 +7,17 @@ nav:
   - EOEPCA Documentation: https://eoepca.readthedocs.io/
   - Operations:
       - Overview: index.md
-      - Basic Concepts: basic-concepts.md
-      - Monitoring Stack: monitoring-stack.md
-      - Dashboards and Usage: dashboards-and-usage.md
-      - ServiceMonitors: service-monitors.md
-      - Alerting and SLOs: alerting-and-slos.md
-      - STAC Scenario: stac-scenario.md
+      - Foundations:
+          - Operating Model: operating-model.md
+          - Observability Basics: basic-concepts.md
+          - Remediation Actions: remediation-actions.md
+      - Current Implementation:
+          - Monitoring Stack: monitoring-stack.md
+          - Dashboards and Usage: dashboards-and-usage.md
+          - ServiceMonitors: service-monitors.md
+          - Alerting and SLOs: alerting-and-slos.md
+      - End-to-End Example:
+          - STAC Service Path: stac-scenario.md
 
 theme:
   name: material

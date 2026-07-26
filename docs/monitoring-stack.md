@@ -1,6 +1,11 @@
 # Monitoring Stack
 
-This page describes the operations stack deployed for the EOEPCA demo environment and how the pieces fit together. The deployment sources live in [`eoepca-plus/argocd/operations`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations).
+This page describes the operations stack deployed for the EOEPCA demo
+environment and how the pieces fit together. In the
+[operating model](operating-model.md), this stack implements much of Inspect
+and provides the evidence and tools used during Investigate. The deployment
+sources live in
+[`eoepca-plus/argocd/operations`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations).
 
 ## Deployed Components
 
@@ -40,13 +45,8 @@ That combination matters because operators usually need both:
 
 ### Alertmanager
 
-Alertmanager handles the mechanics of alert delivery:
-
-- grouping
-- routing
-- deduplication
-
-On its own it is a transport layer for alerts. The Operations BB treats it as necessary, but not sufficient, for operator workflows.
+Alertmanager groups, routes, and deduplicates alerts. It delivers alerts, but
+it does not guide the operator through the response.
 
 ### Loki
 
@@ -71,9 +71,12 @@ The pipeline is defined in [`monitoring/alloy/config.alloy`](https://github.com/
 
 ### Keep
 
-Keep is used as an alert enrichment and triage layer. Instead of forcing operators to jump immediately from a firing alert into raw PromQL or cluster state, it provides a place to correlate the event with additional context.
+Keep enriches alerts and supports triage. It lets operators see an alert and
+related context in one place instead of immediately searching raw PromQL or
+cluster state.
 
-That is especially helpful when several systems can contribute to one visible symptom, which is common on EO platforms.
+This helps when several systems can cause one visible symptom, which is common
+on EO platforms.
 
 ## Public Operator Endpoints
 
@@ -96,4 +99,9 @@ With the current stack, operators can already:
 - evaluate Prometheus rules and Alertmanager routing
 - use Keep to enrich and triage alert events
 
-The remaining challenge is not the absence of a monitoring stack. It is making sure individual EO platform services expose enough native signals for that stack to scrape and interpret well.
+The main gap is not the monitoring stack. Each EO platform service must expose
+enough useful signals for the stack to scrape and interpret.
+
+The next capability is to connect this evidence to the
+[remediation-action library](remediation-actions.md) currently being
+established, then use the same monitoring stack to Verify the service outcome.
