@@ -28,11 +28,11 @@ The eoepca-demo cluster currently has ServiceMonitors in:
 - `operations` for the monitoring and alerting stack
 - `ingress-apisix` for APISIX metrics
 - `infra` for PostgreSQL exporter metrics
-
-There are no `data-access` ServiceMonitors for `eoapi` workloads yet.
+- `data-access` for operation-specific `stac-auth-proxy` metrics
 
 Examples from the current deployment:
 
+- [`eoepca/data-access/parts/servicemonitor-stac-auth-proxy.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/servicemonitor-stac-auth-proxy.yaml) scrapes STAC request and latency metrics
 - [`infra/pgo/parts/servicemonitor-postgres-exporter.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/pgo/parts/servicemonitor-postgres-exporter.yaml) scrapes PostgreSQL exporter metrics
 - [`infra/apisix/parts/servicemonitor-apisix.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/apisix/parts/servicemonitor-apisix.yaml) scrapes APISIX metrics from `/apisix/prometheus/metrics`
 - [`app-keep-oauth2-proxy.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/app-keep-oauth2-proxy.yaml) enables a chart-managed ServiceMonitor for the Keep proxy
@@ -65,33 +65,14 @@ Because that pattern is in place, operators can correlate STAC symptoms with dat
 
 ## Metric Quality Matters Too
 
-A scrape target is only useful when its metric labels are stable. For example,
-APISIX route metrics use controlled labels such as route and HTTP method. The
-labels are configured in
+A scrape target is only useful when its metric labels are stable. APISIX route
+metrics use controlled labels such as route and HTTP method, configured in
 [`infra/apisix/parts/values/apisix-values.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/apisix/parts/values/apisix-values.yaml).
 
-The STAC scenario originally showed a strong need for application-specific metrics. Trying to derive that detail at the gateway by adding a full URL label creates high cardinality: every distinct path, query, or identifier becomes another time series. That increases Prometheus memory, storage, and query cost, especially when values churn quickly.
-
-That is why the better long-term pattern is to expose semantic, low-cardinality metrics from the application itself, then scrape them with a `ServiceMonitor`.
-
-## What a Metrics Endpoint Enables
-
-When a service exposes a useful Prometheus endpoint and is scraped through a `ServiceMonitor`, operators can:
-
-- measure request rate, errors, and latency directly from the service
-- create dashboards that reflect application internals rather than only infrastructure symptoms
-- build SLOs closer to the service boundary
-- correlate platform symptoms with app-level behaviour
-- distinguish gateway issues from application issues more confidently
-
-## What Happens Without It
-
-When a service does not expose native metrics or does not ship a `ServiceMonitor`, operators fall back to indirect signals such as:
-
-- gateway timings
-- pod health and resource usage
-- logs
-- synthetic checks
-
-Those signals are still useful, but they do not replace native application
-metrics. They can show that a path is slow or failing, but often not why.
+The STAC auth proxy follows the same pattern at application level. Its request
+and latency metrics use bounded operation, method, and status labels, allowing
+operators to distinguish searches and other STAC operations without using full
+URLs as metric labels. The
+[STAC end-to-end example](stac-scenario.md#stac-auth-proxy-metrics) shows how
+these metrics complement gateway, workload, database, log, and synthetic
+signals.

@@ -99,9 +99,8 @@ With the current stack, operators can already:
 - evaluate Prometheus rules and Alertmanager routing
 - use Keep to enrich and triage alert events
 
-The main gap is not the monitoring stack. Each EO platform service must expose
-enough useful signals for the stack to scrape and interpret.
-
-The next capability is to connect this evidence to the
-[remediation-action library](remediation-actions.md) currently being
-established, then use the same monitoring stack to Verify the service outcome.
+EO platform services contribute service-specific evidence through managed
+scrape targets. The [ServiceMonitor](service-monitors.md) page explains this
+pattern, and the [STAC end-to-end example](stac-scenario.md) shows it in use
+with operation-specific application metrics. The same signals can then Verify
+whether an operational action restored the service.

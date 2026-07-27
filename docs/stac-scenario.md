@@ -5,6 +5,18 @@ a synchronous HTTP request/response path. The STAC example connects a
 user-visible request to the gateway, authorisation proxy, application, and
 database layers that must cooperate to serve it.
 
+!!! info "Application metrics being established"
+
+    Application-specific metrics for this end-to-end example are partially
+    established. EOEPCA supported the
+    [upstream transition in eoapi](https://github.com/EOEPCA/operations/issues/11#issuecomment-5083997066)
+    to controlled, low-cardinality application metrics.
+    [`stac-auth-proxy`](https://github.com/developmentseed/stac-auth-proxy/releases/tag/v1.2.0)
+    now exposes Prometheus request and latency metrics by STAC operation, and
+    the demo collects them.
+
+    These metrics can be correlated with the gateway, workload, database, log, and synthetic signals described below.
+
 ## Request Path
 
 In the demo environment, the public STAC endpoint is:
@@ -42,6 +54,18 @@ The rule file records burn rates for three views of latency:
 
 The alerting rules currently fire on the request-latency GET and POST records. The upstream and gateway records support diagnosis after an alert fires.
 
+### STAC Auth Proxy Metrics
+
+The STAC auth proxy exposes request counters and latency histograms with
+bounded labels for operation, method, and status. Prometheus collects them
+through the
+[`ServiceMonitor`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/data-access/parts/servicemonitor-stac-auth-proxy.yaml).
+This adds operation-specific evidence for search, collection, item, and other
+STAC requests without using full URLs as metric labels. During Inspect and
+Investigate, operators can compare request rate, errors, and latency by
+operation with APISIX timings, workload health, database metrics, logs, and
+synthetic checks.
+
 ### STAC SLO Dashboard
 
 The curated STAC dashboard is deployed from [`_dashboards/stac-slo.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_dashboards/stac-slo.json). It is built from the same recording rules and shows the route, GET and POST burn rates, gateway and upstream views, and database latency.
@@ -58,7 +82,9 @@ This does not explain every STAC problem, but it gives operators a database-side
 
 ### Logs
 
-Grafana Alloy collects Kubernetes pod logs and forwards them to Loki. STAC-related workloads in `data-access` can therefore be investigated through logs even when the application does not expose native Prometheus metrics.
+Grafana Alloy collects Kubernetes pod logs and forwards them to Loki.
+STAC-related workloads in `data-access` can therefore be investigated through
+logs alongside the application and surrounding metrics.
 
 ### Synthetic Checks
 
@@ -98,11 +124,12 @@ gateway, and database signals.
   dashboards.
 - If the issue looks database-related, the operator follows the PostgreSQL
   exporter signal and `pg_stat_statements`-derived timing.
-- Recent Flux and deployment changes are useful evidence, but are not treated
-  as the cause without supporting observations.
+- Recent Argo CD and deployment changes are useful evidence, but are not
+  treated as the cause without supporting observations.
 
 The current setup shows when the STAC path is at risk and helps separate the
-main layers. It gives less detail about behaviour inside the application.
+main layers. The proxy metrics add operation-level detail, while behaviour
+inside `eoapi-stac` itself remains less visible.
 
 ### Act and Verify
 
@@ -110,7 +137,7 @@ Once the operator has enough evidence, a remediation library should offer only
 actions that are appropriate for the affected layer. STAC actions could
 include:
 
-- reconcile the relevant Flux source or release
+- reconcile the relevant Argo CD application
 - restart a stateless STAC workload
 - scale a stateless workload within predefined limits
 - enable a predefined rate-limiting profile
@@ -135,49 +162,3 @@ After recovery, the team records what was missing or misleading, whether the
 chosen action helped, and what would make the next incident easier. This may
 lead to better STAC metrics, SLOs, dashboards, investigation guidance, action
 preconditions, or verification checks.
-
-## Main Gap: Application-Specific Metrics
-
-The original STAC scenario showed a strong need for application-specific metrics. Today there are no `ServiceMonitor` objects in the `data-access` namespace, and in-cluster checks against both application endpoints return `404` for `/metrics`:
-
-```text
-http://eoapi-stac.data-access.svc.cluster.local:8080/metrics
-http://eoapi-stac-auth-proxy.data-access.svc.cluster.local:8080/metrics
-```
-
-Operators must therefore infer STAC behaviour from surrounding layers:
-
-- APISIX request and upstream timings
-- Kubernetes pod health, restarts, and resource usage
-- database exporter metrics
-- logs
-- synthetic checks
-
-APISIX can separate GET and POST traffic, but it cannot see the STAC operation semantics inside those requests. From the outside, modification requests and search requests are both POST requests. GET requests have a similar problem: a single item lookup, a large collection or item listing, and a simple HTTP probe can all look like GET traffic on the same public route.
-
-Those signals are valuable, but they do not expose application decisions. Useful native metrics could be added to `eoapi-stac`, `eoapi-stac-auth-proxy`, or both. Examples include request counters and latency histograms by route template, method, operation, status class, and outcome; auth and filtering decisions in the proxy; cache behaviour; and database-pool or worker saturation inside the STAC application.
-
-## Why Not Use Full URLs From APISIX?
-
-One early idea was to scrape or label full URLs at APISIX to recover more STAC detail from gateway metrics. That quickly runs into high-cardinality problems.
-
-High cardinality means a metric has too many distinct label value combinations. In Prometheus, each unique combination becomes a separate time series. If a label contains full URLs, item IDs, collection IDs, user IDs, or query strings, the number of time series can grow quickly and churn constantly. That increases memory use, storage cost, and query latency, and it can make alerts less reliable.
-
-The current APISIX configuration in [`infra/apisix/parts/values/apisix-values.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/apisix/parts/values/apisix-values.yaml) keeps the useful low-cardinality dimensions, such as route and HTTP method. For deeper STAC insight, the safer pattern is application-native metrics with controlled labels.
-
-## Better End State
-
-The next step is to add metrics directly to the STAC application path:
-
-- expose a Prometheus-compatible metrics endpoint in `eoapi-stac`
-- expose proxy-specific metrics from `eoapi-stac-auth-proxy` if authorisation and filtering behaviour needs to be operated separately
-- add stable labels and a `ServiceMonitor` for each metrics endpoint
-- extend the STAC dashboard and alerts with native application metrics
-
-With that in place, the Operations BB can move from "the STAC path is slow"
-toward "this specific layer of the STAC application path is contributing to the
-degradation".
-
-The next step is to connect that evidence to the remediation-action library.
-The operator must be able to trace the evidence, decision, approval, action,
-verification, and outcome.

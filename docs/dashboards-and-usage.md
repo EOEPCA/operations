@@ -94,7 +94,14 @@ A practical operator workflow often looks like this:
 
 ## EO Platform Dashboards
 
-The STAC dashboard is intentionally built from the metrics available today. It
-is useful for gateway, upstream, and database correlation, but the
-[end-to-end STAC example](stac-scenario.md) explains why application-native
-metrics would make it much stronger.
+Application-specific metrics from EO services are especially valuable in
+Grafana. In the eoAPI STAC path, `stac-auth-proxy` now exposes request and
+latency metrics that can be filtered by operation. Native metrics from
+`stac-fastapi-pgstac` are still being established.
+
+The curated STAC SLO dashboard does not yet use these operation-specific
+series; it remains based on the APISIX route and supporting upstream and
+database records.
+
+The [end-to-end STAC example](stac-scenario.md#stac-auth-proxy-metrics)
+describes how the new metrics complement the existing dashboard signals.
