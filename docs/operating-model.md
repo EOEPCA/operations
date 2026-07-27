@@ -106,7 +106,7 @@ select a known outcome instead of assembling commands during an incident.
 
 This capability is currently being established. The
 [Remediation Actions](remediation-actions.md) page explains the core concept,
-safety boundaries, candidate actions, and current status.
+action requirements, and execution flow.
 
 ## How the Current Stack Supports the Model
 
