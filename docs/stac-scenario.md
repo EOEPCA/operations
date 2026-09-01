@@ -44,7 +44,7 @@ the likely layer.
 
 ### APISIX Route Metrics
 
-APISIX metrics are scraped through the ServiceMonitor in `ingress-apisix`. The STAC rules in [`_rules/stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/stac-alerts.yaml) use the stable APISIX route label `data-access_stac_stac-route`.
+APISIX metrics are scraped through the ServiceMonitor in `ingress-apisix`. The STAC rules in [`_rules/stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/stac-alerts.yaml) use the stable APISIX route label `data-access_stac_stac-route`.
 
 The rule file records burn rates for three views of latency:
 
@@ -68,7 +68,7 @@ synthetic checks.
 
 ### STAC SLO Dashboard
 
-The curated STAC dashboard is deployed from [`_dashboards/stac-slo.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_dashboards/stac-slo.json). It is built from the same recording rules and shows the route, GET and POST burn rates, gateway and upstream views, and database latency.
+The curated STAC dashboard is deployed from [`_dashboards/stac-slo.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/stac-slo.json). It is built from the same recording rules and shows the route, GET and POST burn rates, gateway and upstream views, and database latency.
 
 ### Database Metrics
 
@@ -107,8 +107,8 @@ established is the next step needed to complete Act.
 
 A practical STAC incident flow is:
 
-1. A STAC burn-rate alert fires from [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/stac-alerts.yaml).
-2. Alertmanager forwards the alert to Keep through [`alertmanagerconfig-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/alertmanagerconfig-keep.yaml) and [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/keep-alertmanager-relay.yaml).
+1. A STAC burn-rate alert fires from [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/stac-alerts.yaml).
+2. Alertmanager forwards the alert to Keep through [`alertmanagerconfig-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/alertmanagerconfig-keep.yaml) and [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/keep-alertmanager-relay.yaml).
 
 Inspect should present these as one service incident: the affected STAC
 operation, observed latency or errors, SLO impact, correlated gateway and

@@ -16,7 +16,7 @@ This lets each component do the job it is good at.
 
 ## Baseline Alerts
 
-The baseline rules live in [`_rules/baseline-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/baseline-alerts.yaml). They cover platform-level concerns such as:
+The baseline rules live in [`_rules/baseline-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/baseline-alerts.yaml). They cover platform-level concerns such as:
 
 - missing Prometheus targets
 - Prometheus ingest problems
@@ -43,9 +43,9 @@ That is why the Operations BB also motivates an enrichment layer.
 
 In the EOEPCA demo, Keep is integrated through:
 
-- [`alertmanagerconfig-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/alertmanagerconfig-keep.yaml)
-- [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/keep-alertmanager-relay.yaml)
-- [`app-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/alerting/app-keep.yaml)
+- [`alertmanagerconfig-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/alertmanagerconfig-keep.yaml)
+- [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/keep-alertmanager-relay.yaml)
+- [`app-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/app-keep.yaml)
 
 Selected alerts arrive in Keep with related operational context. This shortens
 the time between "alert fired" and "operator knows what to inspect next".
@@ -96,7 +96,7 @@ For a 30-day SLO window, sustaining a `14.4` burn rate would use the whole 30-da
 
 Because the example uses the one-hour burn-rate record, it is intended to catch sharp, urgent degradation. That is more meaningful than a generic infrastructure threshold because it directly connects to service quality.
 
-The deployed STAC rules are defined in [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/operations/_rules/stac-alerts.yaml). The live `stac-alerts` PrometheusRule contains:
+The deployed STAC rules are defined in [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/stac-alerts.yaml). The live `stac-alerts` PrometheusRule contains:
 
 - one-hour and six-hour request-latency burn-rate records for STAC GET and POST requests
 - matching upstream application and APISIX gateway burn-rate records for diagnosis

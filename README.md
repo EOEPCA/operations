@@ -2,7 +2,10 @@
 
 This repository contains the documentation source for the EOEPCA Operations Building Block. Its job is to publish the Read the Docs pages and provide a small set of examples that explain why the building block exists for EO platform operators.
 
-The deployment sources live in the [`EOEPCA/eoepca-plus`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/operations) repository, especially under `argocd/operations`.
+The deployment sources live in the
+[`EOEPCA/eoepca-plus`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/eoepca/operations)
+repository under `argocd/eoepca/operations`. The deployable parts are in the
+`parts/` directory.
 
 ## Update the docs
 

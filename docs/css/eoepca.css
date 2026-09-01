@@ -20,7 +20,8 @@ img.centered {
   margin-right: auto;
 }
 
-img.operations-model {
+img.operations-model,
+img.operations-diagram {
   display: block;
   width: 100%;
   max-width: 1100px;

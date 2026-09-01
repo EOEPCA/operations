@@ -16,6 +16,7 @@ nav:
           - Dashboards and Usage: dashboards-and-usage.md
           - ServiceMonitors: service-monitors.md
           - Alerting and SLOs: alerting-and-slos.md
+          - Security Operations: security-operations.md
       - End-to-End Example:
           - STAC Service Path: stac-scenario.md
 
