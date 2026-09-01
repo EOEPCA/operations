@@ -124,8 +124,8 @@ gateway, and database signals.
   dashboards.
 - If the issue looks database-related, the operator follows the PostgreSQL
   exporter signal and `pg_stat_statements`-derived timing.
-- Recent Argo CD and deployment changes are useful evidence, but are not
-  treated as the cause without supporting observations.
+- Recent deployment changes are useful evidence, but are not treated as the
+  cause without supporting observations.
 
 The current setup shows when the STAC path is at risk and helps separate the
 main layers. The proxy metrics add operation-level detail, while behaviour
@@ -137,11 +137,9 @@ Once the operator has enough evidence, a remediation library should offer only
 actions that are appropriate for the affected layer. STAC actions could
 include:
 
-- reconcile the relevant Argo CD application
 - restart a stateless STAC workload
 - scale a stateless workload within predefined limits
 - enable a predefined rate-limiting profile
-- open a GitOps change for a durable correction
 
 These actions are proposals and are not yet part of the current demo.
 Production changes require human approval.

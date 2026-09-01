@@ -8,10 +8,10 @@
 >
   <title id="title">EOEPCA security control paths</title>
   <desc id="description">
-    Reviewed Git state is reconciled by Argo CD and checked by Pod Security
-    Admission, Kyverno, and Trivy. User requests enter through APISIX, which
-    uses Keycloak identity and OPA authorization before forwarding an allowed
-    request. Both paths produce evidence for the monitoring and response tools.
+    Workload specifications are checked by Pod Security Admission, Kyverno,
+    and Trivy. User requests enter through APISIX, which uses Keycloak identity
+    and OPA authorization before forwarding an allowed request. Both paths
+    produce evidence for the monitoring and response tools.
   </desc>
 
   <defs>
@@ -70,7 +70,7 @@
     font-weight="800"
     letter-spacing="1.4"
   >
-    WORKLOAD CHANGE
+    WORKLOAD SECURITY
   </text>
 
   <g filter="url(#shadow)">
@@ -80,15 +80,16 @@
     <rect x="885" y="100" width="255" height="110" rx="18" fill="#ffffff" />
   </g>
 
-  <text x="155" y="148" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="750">Reviewed Git state</text>
-  <text x="155" y="174" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">declares the intent</text>
+  <text x="155" y="148" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="750">Workload spec</text>
+  <text x="155" y="174" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">defines Pod settings</text>
 
-  <text x="405" y="148" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="750">Argo CD</text>
-  <text x="405" y="174" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">reconciles desired state</text>
+  <text x="405" y="137" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="750">Pod Security</text>
+  <text x="405" y="160" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="750">Admission</text>
+  <text x="405" y="184" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">checks new Pods</text>
 
-  <text x="692.5" y="137" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="750">PSA and Kyverno</text>
-  <text x="692.5" y="164" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">check Pod configuration</text>
-  <text x="692.5" y="187" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">and create policy evidence</text>
+  <text x="692.5" y="137" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="750">Kyverno</text>
+  <text x="692.5" y="164" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">checks policy in background</text>
+  <text x="692.5" y="187" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">and creates reports</text>
 
   <text x="1012.5" y="137" text-anchor="middle" fill="#173042" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="750">Trivy Operator</text>
   <text x="1012.5" y="164" text-anchor="middle" fill="#5b7481" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="14">scans deployed resources</text>

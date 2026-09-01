@@ -19,7 +19,7 @@ If you are new to the platform, read the pages in this order:
    [Alerting and SLOs](alerting-and-slos.md) when you respond to a service
    symptom.
 5. Use [Security Operations](security-operations.md) when you inspect policy,
-   access, vulnerability, secret, certificate, audit, or GitOps controls.
+   access, vulnerability, secret, certificate, or audit controls.
 6. Work through the [STAC Service Path](stac-scenario.md) to see the complete
    workflow for one user-facing service.
 
@@ -34,7 +34,7 @@ capability that does not yet exist.
 | Platform metrics and logs | Deployed | Prometheus metrics and Loki logs for platform and selected application components. |
 | Dashboards, alert evaluation, and alert routing | Deployed | Grafana views, Prometheus rules, Alertmanager routing, and Keep triage. |
 | STAC service-path evidence | Partially established | Gateway, proxy, workload, database, log, synthetic, and SLO signals. Native metrics inside `eoapi-stac` are still limited. |
-| Security controls and evidence | Declared in the demo deployment | Policy, scan, identity, network, secret, certificate, audit, alert, and GitOps controls. Verify their health and synchronization in the target cluster before relying on them. |
+| Security controls and evidence | Declared in the demo deployment | Policy, scan, identity, network, secret, certificate, audit, and alert controls. Confirm that each control produces current evidence before relying on it. |
 | Remediation-action library | Being established | A future set of named, bounded actions with approval and service-level verification. |
 
 ## How the Pieces Fit Together
@@ -42,8 +42,8 @@ capability that does not yet exist.
 Prometheus and synthetic checks detect a symptom. Alertmanager routes the
 alert, and Keep gives the operator a place to triage it. Grafana combines
 Prometheus metrics with Loki logs so that the operator can narrow the failure
-domain. Kubernetes and Argo CD show workload health and desired-state changes.
-Security reports add policy and vulnerability evidence.
+domain. Kubernetes shows workload health. Security reports add policy and
+vulnerability evidence.
 
 These tools support decisions. They do not prove a root cause or make a change
 safe by themselves. The operator must select an action, confirm its target and
@@ -55,8 +55,6 @@ preconditions, and verify the user-facing result.
 - Check the monitoring path itself when evidence is missing or inconsistent.
 - Treat recent changes, logs, and scan findings as evidence. Do not treat them
   as proof without corroboration.
-- Make lasting changes through the GitOps source and confirm Argo CD
-  synchronization.
 - Verify the external service result after a change. A successful command or a
   healthy Pod is not sufficient.
 

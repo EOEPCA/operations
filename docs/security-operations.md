@@ -5,10 +5,8 @@ protection. Some controls prevent or limit an action. Other controls find risk,
 record evidence, or notify an operator.
 
 This page explains why each control exists, what an operator can do with it,
-and how to apply it safely. It describes the desired state in the
-`deploy-develop` branch. Desired state is not proof of live state. Before you
-depend on a control, confirm that its Argo CD application is synchronized and
-healthy and that the control produces current evidence.
+and how to apply it safely. It describes the controls in the `deploy-develop`
+deployment.
 
 ## Start With the Security Question
 
@@ -23,7 +21,6 @@ that you need.
 | What can a workload access inside the cluster? | Kubernetes RBAC and NetworkPolicy | They limit Kubernetes API permissions and network paths. | Inspect effective permissions, then test one allowed flow and one denied flow. |
 | How should a secret or certificate reach a workload? | Sealed Secrets, External Secrets Operator (ESO), and cert-manager | They protect Git-stored values, synchronize externally stored values, and manage TLS certificates. | Choose one source-of-truth model, limit access, and monitor synchronization or renewal. |
 | What happened, and does someone need to respond? | Grafana Alloy, Loki, Prometheus, Grafana, Alertmanager, and Keep | They collect evidence, detect conditions, present context, and route the response. | Trace a safe test event from its source to the operator notification. |
-| Does the cluster match reviewed configuration? | Git and Argo CD | They define and reconcile desired state and show drift. | Compare live resources with the intended revision after every operational change. |
 
 ## Understand What Each Part Does
 
@@ -47,8 +44,6 @@ that you need.
 - **Alloy and Loki** collect and store logs. **Prometheus and Grafana** provide
   metrics, rules, and dashboards. **Alertmanager and Keep** route and coordinate
   a response. These tools report state; they do not enforce a policy.
-- **Argo CD** applies reviewed desired state and reports drift. A synchronized
-  application can still contain an unsafe configuration.
 
 ## How the Pieces Work Together
 
@@ -56,23 +51,17 @@ There are two main control paths. A workload change goes through Kubernetes
 policy controls. A user request goes through the identity and authorization
 controls. Both paths produce evidence for the monitoring and response tools.
 
-![Reviewed workload changes pass through Git, Argo CD, Pod Security Admission, Kyverno, and Trivy. User requests pass through APISIX with Keycloak identity and OPA authorization. Both paths produce evidence for monitoring and response.](img/security-control-paths.svg){ .operations-diagram }
+![Workload specifications are checked by Pod Security Admission, Kyverno, and Trivy. User requests pass through APISIX with Keycloak identity and OPA authorization. Both paths produce evidence for monitoring and response.](img/security-control-paths.svg){ .operations-diagram }
 
 ## Apply the Operating Model
 
 | Stage | Security operator activity |
 | --- | --- |
-| **Inspect** | Check Argo CD health, dashboard state, alert state, report freshness, scan coverage, and audit-source health. |
+| **Inspect** | Check dashboard state, alert state, report freshness, scan coverage, and audit-source health. |
 | **Investigate** | Confirm the affected resource, image digest, identity, route, policy, time, and evidence source. Distinguish a finding from its actual exposure and impact. |
-| **Act** | Make the smallest reviewed change through Git. Keep exceptions narrow, approvals explicit, and targets unambiguous. |
-| **Verify** | Repeat an expected pass and failure. Confirm that the live resource matches Git and that evidence reaches the operator. |
+| **Act** | Make the smallest reviewed change. Keep exceptions narrow, approvals explicit, and targets unambiguous. |
+| **Verify** | Repeat an expected pass and failure. Confirm that the control produces the expected result and that evidence reaches the operator. |
 | **Learn** | Improve policy, coverage, alerts, investigation guidance, exceptions, or control design after the immediate risk is contained. |
-
-!!! warning "Use read-only checks first"
-
-    The commands on this page inspect state unless the text says otherwise.
-    Make lasting changes in the deployment repository. A direct cluster change
-    can conflict with Argo CD or disappear during reconciliation.
 
 ## Understand the Policy Boundaries
 
@@ -137,7 +126,7 @@ kubectl get pods -n <namespace> -o wide
 kubectl get deploy,statefulset,daemonset,job,cronjob -n <namespace>
 ```
 
-Then apply the audit boundary through Git:
+Use these labels for the audit boundary:
 
 ```yaml
 metadata:
@@ -205,19 +194,24 @@ host access:
 - The rclone CSI node plug-in registers with kubelet and mounts storage in
   workload Pod directories.
 
-Each exception is limited by namespace, workload labels or names, and specific
-Pod Security controls. Each also records an owner, reason, and review date.
+Only a platform or security operator approves and adds an exception. Before
+approval, confirm that the privilege is necessary, the compensating control is
+active, and the match is limited to the applicable workload, policy rules,
+images, and Pod Security controls. Record the accountable owner, reason, and a
+future `security.eoepca.org/review-after` date. A matching report result becomes
+`skip`; it is not a compliance pass.
 
-Use the same structure for a new exception. Do not exclude a complete namespace
-when a workload selector and a small control list are sufficient. Confirm that
-the compensating control is active, and remove the exception when the component
-no longer needs the privilege.
+The review date is governance metadata. Kyverno does not automatically expire
+or delete the exception when that date arrives. The operator must remove or
+narrow the exception, or approve it again and set a new review date. Until that
+change is made, the exception stays active. After removal, background reports
+show the violation again. An enforcing policy also rejects new or changed
+noncompliant resources; it does not delete existing resources.
 
-An exception is accepted risk, not proof of compliance. Review due exceptions
-with:
+Review exceptions and their annotations with:
 
 ```bash
-kubectl get policyexception -n kyverno-system -o yaml
+kubectl get policyexceptions.kyverno.io -n kyverno-system -o yaml
 ```
 
 ## Operate Trivy Operator
@@ -379,32 +373,10 @@ through Alloy, Loki, the alert rule, Alertmanager, and Keep. Also verify that
 alerts exist for missing metrics or a stopped source. Keep raw security logs
 for the approved retention period; dashboards are not a historical record.
 
-## Protect GitOps State
-
-Argo CD is the control that connects reviewed manifests to live resources. Use
-Git for stable policy, exceptions, alert rules, secret references, and
-certificate definitions. Require review for changes that reduce enforcement or
-expand privilege.
-
-After a live troubleshooting change:
-
-1. Decide whether the change is temporary or must become the desired state.
-2. Put a required change in Git and wait for a successful synchronization.
-3. Remove temporary resources, field ownership, reconciliation pauses, and
-   ignore rules.
-4. Compare the complete live resource with the render from the intended Git
-   revision.
-
-A green Argo CD application means that live state matches declared state. It
-does not mean that the declared state is secure. Kyverno, Trivy, review, and
-runtime evidence provide the additional checks.
-
 ## Minimum Sign-off Evidence
 
 Before security sign-off, confirm that:
 
-- the Argo CD applications for each required security control are synchronized
-  and healthy
 - native PSA warnings and Kyverno policy reports are current and reviewed
 - one expected policy pass and one expected violation were tested
 - each policy exception has a narrow match, owner, reason, compensating
@@ -417,7 +389,6 @@ Before security sign-off, confirm that:
   test output
 - certificates have a healthy issuer path and sufficient time before expiry
 - a safe Kubernetes API event reached Alloy, Loki, Alertmanager, and Keep
-- the live resources match the intended Git render after testing
 
 ## Deployment Sources
 
