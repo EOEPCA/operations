@@ -96,6 +96,13 @@ to compare pass, fail, warning, error, and skipped results and to find the
 affected namespace or policy. Check the age of the underlying policy reports
 before you trust a quiet dashboard.
 
+The main views show:
+
+- policy failures
+- policy exceptions and skipped results
+- policy-engine errors
+- result rate by policy, rule, and result
+
 ### Security / Trivy
 
 Source: [`trivy-security.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/trivy-security.json)
@@ -104,6 +111,15 @@ This dashboard summarizes vulnerability, exposed-secret, configuration, RBAC,
 and compliance findings. Use it to find an area that needs investigation. Then
 open the matching Trivy report resource to confirm the image, object, finding,
 and report age. A dashboard total is not proof that every workload was scanned.
+
+The main views show:
+
+- critical image vulnerabilities
+- high or critical exposed secrets
+- critical configuration and RBAC findings
+- failed compliance checks
+- security-finding trends
+- vulnerability and configuration findings by namespace
 
 ## Typical Operator Usage
 

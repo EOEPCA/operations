@@ -1,5 +1,13 @@
 # Operating Model
 
+EOEPCA services use gateways, workloads, databases, and background components.
+The operating model helps an operator turn evidence of a user-visible problem
+into a safe, verified response. It connects monitoring, investigation, action,
+and learning. It does not replace operator judgement or service-specific
+knowledge.
+
+![The EOEPCA operating model moves from Inspect to Investigate and Act. Verify completes Act, and Learn improves the next response.](img/operating-model.svg){ .operations-model }
+
 The model separates finding a problem, understanding it, changing the system,
 and improving the next response. It starts with the operator workflow, not a
 specific tool.
@@ -7,6 +15,16 @@ specific tool.
 Verify is part of Act: an operation is not complete until the service outcome
 has been checked. Learn follows recovery and feeds the experience back into the
 next response.
+
+## Operating Rules
+
+- Start with the affected user outcome, not with a tool.
+- Check the monitoring path when evidence is missing or inconsistent.
+- Treat recent changes, logs, and scan findings as evidence. Confirm them with
+  another source before you identify a cause.
+- Confirm the action target and preconditions before a change.
+- Verify the external service result after a change. A successful command or a
+  healthy Pod is not sufficient.
 
 ## Observe: Inspect
 
