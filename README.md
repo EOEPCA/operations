@@ -1,24 +1,29 @@
-# EOEPCA Operations Building Block
+# Operations
 
-This repository contains the documentation source for the EOEPCA Operations
-Building Block. The pages describe the monitoring tools and include examples
-for EO platform operators. They are published on Read the Docs.
+Documentation and examples for the EOEPCA Operations Building Block.
 
-The deployment sources live in the
-[`EOEPCA/eoepca-plus`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/eoepca/operations)
-repository under `argocd/eoepca/operations`. The deployable parts are in the
-`parts/` directory.
+- [Documentation](https://eoepca.readthedocs.io/projects/operations/)
+- [Operating model](docs/operating-model.md)
+- [Monitoring stack](docs/monitoring-stack.md)
+- [Dashboards and usage](docs/dashboards-and-usage.md)
+- [STAC service path](docs/stac-scenario.md)
+- [Workspace monitoring](docs/workspace-scenario.md)
+- [Deployment sources](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/eoepca/operations/parts)
 
-## Update the docs
+## Local checks
 
-Edit the content in [`docs/`](./docs) and verify the site locally:
+To build the documentation and check links within it:
 
 ```bash
-uv run --with-requirements docs/requirements.txt mkdocs serve
+uv run --no-project --with-requirements docs/requirements.txt mkdocs build --strict
 ```
 
-## Read the Docs
+To preview it locally:
 
-The published documentation is available at:
+```bash
+uv run --no-project --with-requirements docs/requirements.txt mkdocs serve
+```
 
-<https://eoepca.readthedocs.io/projects/operations/>
+## License
+
+[Apache 2.0](LICENSE).
