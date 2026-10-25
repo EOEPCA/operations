@@ -1,7 +1,7 @@
 # Monitoring Stack
 
-This page explains why each monitoring component exists, what an operator can
-do with it, and how the pieces fit together in the EOEPCA demo. In the
+This page describes the monitoring components in the EOEPCA demo and how
+operators use them. In the
 [operating model](operating-model.md), this stack implements much of Inspect
 and provides the evidence and tools used during Investigate. The deployment
 sources live in
@@ -32,22 +32,22 @@ and
 
 ### Prometheus
 
-Prometheus is the core metrics engine. In the EOEPCA demo it:
+Prometheus collects and stores metrics. In the EOEPCA demo it:
 
 - scrapes platform and application targets
-- evaluates baseline and STAC-specific rules
+- evaluates baseline, service, and workspace recording and alerting rules
 - stores time series for dashboards and alerting
 
 The retention and persistence settings are defined in [`app-kube-prometheus-stack.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/monitoring/app-kube-prometheus-stack.yaml).
 
 ### Grafana
 
-Grafana is the operator-facing dashboard layer. In the demo it is configured with OIDC login and a Loki data source alongside Prometheus.
+Grafana shows metrics and logs in dashboards. In the demo it is configured with OIDC login and a Loki data source alongside Prometheus.
 
-That combination matters because operators usually need both:
+Use the two data sources for different checks:
 
 - Prometheus for trends, ratios, and alert queries
-- Loki for contextual log exploration
+- Loki for request errors and component events
 
 ### Alertmanager
 
@@ -79,16 +79,16 @@ The pipeline is defined in [`monitoring/alloy/config.alloy`](https://github.com/
 
 ### Keep
 
-Keep enriches alerts and supports triage. It lets operators see an alert and
-related context in one place instead of immediately searching raw PromQL or
-cluster state.
+Keep adds related information to alerts and tracks the response. Operators
+can review an alert, its owner, and supporting data before running more
+detailed queries in Prometheus or Kubernetes.
 
-This helps when several systems can cause one visible symptom, which is common
-on EO platforms.
+For example, a slow STAC request can need checks of the gateway, application,
+and database.
 
-## Apply the Stack Well
+## Use the Stack During an Incident
 
-Use the tools as one evidence path:
+Follow the affected request or service through the tools:
 
 1. Start with the affected service, operation, and time window in Keep or the
    relevant Grafana dashboard.
@@ -113,9 +113,9 @@ These endpoints are exposed through APISIX routes:
 - [`monitoring/routes.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/monitoring/routes.yaml)
 - [`alerting/routes.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/routes.yaml)
 
-## What This Gives Operators
+## Operator Tasks
 
-With the current stack, operators can already:
+Use the stack to:
 
 - inspect cluster and workload resource behaviour in Grafana
 - query logs from EO platform workloads through Loki
@@ -123,7 +123,7 @@ With the current stack, operators can already:
 - use Keep to enrich and triage alert events
 
 EO platform services contribute service-specific evidence through managed
-scrape targets. The [ServiceMonitor](service-monitors.md) page explains this
-pattern, and the [STAC end-to-end example](stac-scenario.md) shows it in use
-with operation-specific application metrics. The same signals can then Verify
-whether an operational action restored the service.
+scrape targets. The [ServiceMonitors and PodMonitors](service-monitors.md) page explains
+collection. The [STAC](stac-scenario.md) and
+[workspace](workspace-scenario.md) examples show how the metrics help with
+investigation and verification after a change.

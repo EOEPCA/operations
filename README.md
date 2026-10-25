@@ -1,6 +1,8 @@
 # EOEPCA Operations Building Block
 
-This repository contains the documentation source for the EOEPCA Operations Building Block. Its job is to publish the Read the Docs pages and provide a small set of examples that explain why the building block exists for EO platform operators.
+This repository contains the documentation source for the EOEPCA Operations
+Building Block. The pages describe the monitoring tools and include examples
+for EO platform operators. They are published on Read the Docs.
 
 The deployment sources live in the
 [`EOEPCA/eoepca-plus`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/eoepca/operations)

@@ -1,21 +1,20 @@
 # End-to-End Example: STAC Service Path
 
-This page applies the Operations Building Block operating model end to end to
-a synchronous HTTP request/response path. The STAC example connects a
-user-visible request to the gateway, authorisation proxy, application, and
-database layers that must cooperate to serve it.
+This page follows a STAC request through the gateway, authorisation proxy,
+application, and database. It applies the Operations Building Block operating
+model to a slow or failed HTTP request.
 
-!!! info "Application metrics being established"
+!!! info "Application metrics"
 
-    Application-specific metrics for this end-to-end example are partially
-    established. EOEPCA supported the
+    The demo collects request and latency metrics from the proxy and backend.
+    EOEPCA supported the
     [upstream transition in eoapi](https://github.com/EOEPCA/operations/issues/11#issuecomment-5083997066)
     to controlled, low-cardinality application metrics.
-    [`stac-auth-proxy`](https://github.com/developmentseed/stac-auth-proxy/releases/tag/v1.2.0)
-    now exposes Prometheus request and latency metrics by STAC operation, and
-    the demo collects them.
+    `stac-auth-proxy` exposes Prometheus request and latency metrics by STAC
+    operation.
 
-    These metrics can be correlated with the gateway, workload, database, log, and synthetic signals described below.
+    Compare these metrics with the gateway, workload, database, logs, and
+    synthetic checks described below.
 
 ## Request Path
 
@@ -33,7 +32,7 @@ client
   -> PostgreSQL / pgSTAC
 ```
 
-This example is useful because one symptom can come from several layers:
+A failed or slow request can have several causes:
 gateway routing, authorisation and filtering, the STAC application, or the
 database.
 
@@ -68,7 +67,16 @@ synthetic checks.
 
 ### STAC SLO Dashboard
 
-The curated STAC dashboard is deployed from [`_dashboards/stac-slo.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/stac-slo.json). It is built from the same recording rules and shows the route, GET and POST burn rates, gateway and upstream views, and database latency.
+The STAC dashboard is deployed from
+[`_dashboards/stac-slo.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/stac-slo.json).
+It has separate sections for `stac-auth-proxy` and `eoapi-stac`, using each
+service's request counters and latency histograms. Panels show request rates,
+HTTP 5xx errors, p99 latency, and latency budget use. The target is 99% of GET
+and POST requests within 500 ms over 30 days.
+
+The dashboard also shows mean query latency for the shared eoapi database.
+Proxy and backend request counts overlap; do not add them. Dashboard metrics
+come from the services, while alerts still measure the public APISIX route.
 
 ### Database Metrics
 
@@ -78,7 +86,8 @@ The STAC rules include a database correlation record based on PostgreSQL exporte
 avg(ccp_pg_stat_statements_total_mean_exec_time_ms{dbname="eoapi", role="eoapi"})
 ```
 
-This does not explain every STAC problem, but it gives operators a database-side signal when the route is slow.
+Use this record to compare a slow route with database query timing. It is a
+mean for the shared database and does not identify a single STAC query.
 
 ### Logs
 
@@ -98,14 +107,14 @@ application.
 
 ## Inspect, Investigate, and Act
 
-The current STAC setup already supports much of Inspect and provides evidence
-for a human-led Investigate. The
-[remediation-action library](remediation-actions.md) currently being
-established is the next step needed to complete Act.
+The STAC setup supports Inspect and supplies metrics and logs for
+Investigate. The [remediation-action library](remediation-actions.md) is still
+in development. It will define how approved actions run and how recovery is
+checked.
 
 ### Inspect
 
-A practical STAC incident flow is:
+When a STAC alert fires:
 
 1. A STAC burn-rate alert fires from [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/stac-alerts.yaml).
 2. Alertmanager forwards the alert to Keep through [`alertmanagerconfig-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/alertmanagerconfig-keep.yaml) and [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/keep-alertmanager-relay.yaml).
@@ -116,8 +125,8 @@ dependency signals, and links to the evidence.
 
 ### Investigate
 
-The operator opens the STAC SLO dashboard to compare request, upstream,
-gateway, and database signals.
+The operator opens the STAC dashboard to compare proxy, backend, and database
+signals. APISIX metrics show the public route, upstream, and gateway timings.
 
 - If the issue looks application-related, the operator checks the `eoapi-stac`
   and `eoapi-stac-auth-proxy` pods, logs, and surrounding Kubernetes resource
@@ -127,9 +136,9 @@ gateway, and database signals.
 - Recent deployment changes are useful evidence, but are not treated as the
   cause without supporting observations.
 
-The current setup shows when the STAC path is at risk and helps separate the
-main layers. The proxy metrics add operation-level detail, while behaviour
-inside `eoapi-stac` itself remains less visible.
+Compare the proxy and backend metrics to locate the delay or errors. If these
+do not explain a slow public request, check APISIX timing, the database, and
+logs for the same time range.
 
 ### Act and Verify
 

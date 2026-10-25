@@ -1,35 +1,34 @@
 # Remediation Actions
 
-A `RemediationAction` is a named, bounded operational procedure. It connects
-**Investigate** to **Act** by turning a selected mitigation into a known action
-that can be approved, run consistently, and verified.
+A `RemediationAction` is a named operational procedure with defined targets
+and limits. It connects **Investigate** to **Act**: the operator selects an
+action that can be approved, run consistently, and verified.
 
-The remediation-action library is the curated collection of those procedures.
+The remediation-action library holds these procedures.
 
-!!! info "Capability being established"
+!!! info "In development"
 
-    The remediation-action library is currently being defined and developed.
-    It is not yet a finished capability of the deployed Operations Building
-    Block.
+    The remediation-action library is still being defined and developed.
+    It is not yet available in the deployed Operations Building Block.
 
     The current stack already supports much of Inspect and helps operators
-    Investigate. The next step is to establish a small action library and close
-    the loop through execution and verification.
+    Investigate. The next step is to add a small action library with execution
+    and verification checks.
 
-    This page covers only the core concept. A stable API, resource model, and
-    executor design have not yet been established.
+    This page describes what the library should do. The API, resource model,
+    and execution design are not yet settled.
 
 ## Why Use an Action Library?
 
 During an incident, an operator should not have to assemble commands or work
-out safety rules again. An action library offers named, trusted operational
-choices. A script, Kubernetes operation, workflow, or API call may implement an
-action, but the operator selects the intended outcome rather than supplying
-arbitrary commands.
+out safety rules again. An action library provides prepared procedures with
+known checks and limits. A script, Kubernetes operation, workflow, or API call
+may implement an action. The operator selects the intended outcome from the
+library.
 
 Read-only checks may run automatically. Production changes require human
 approval, operate only on explicit targets and within defined limits, and
-include service-level verification and bounded retries. Destructive,
+include service-level verification and a retry limit. Destructive,
 data-affecting, or identity and access operations remain outside the ordinary
 library.
 
@@ -48,9 +47,9 @@ Each action defines:
 
 1. **Select:** Investigate identifies a suitable action.
 2. **Check and approve:** Preconditions, target, and approval are confirmed.
-3. **Execute:** The implementation performs the bounded change.
+3. **Execute:** The system runs the change within the defined limits.
 4. **Verify:** Technical health and the user-facing outcome are checked.
-5. **Record:** Evidence, approval, execution, and outcome remain traceable.
+5. **Record:** Save the evidence, approval, execution details, and result.
 
 If verification fails, the action has not resolved the incident. The response
 returns to Investigate or follows the defined stop, rollback, retry, or

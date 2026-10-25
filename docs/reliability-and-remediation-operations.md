@@ -2,8 +2,8 @@
 
 Reliability and Remediation Operations starts with a user-visible service
 result. Metrics, logs, alerts, Kubernetes state, Git history, and GitOps state
-help an operator explain the symptom. A safe response also needs a bounded
-action and independent proof that users recovered.
+help an operator explain the symptom. A response also needs an action with
+clear limits and a separate check that users can use the service again.
 
 ## Deployed Tools and Configuration
 
@@ -24,8 +24,8 @@ was read-only, so it did not create faults or run remediation.
 that automation is not available or the check needs manual work. The mark does
 not mean that the complete check has passed.
 
-Only commands that returned HTTP 200 and useful evidence during the live review
-are included. Re-run them before sign-off.
+The commands below returned useful results during the previous live review.
+Re-run them before sign-off.
 
 | Sign-off check | Automated part | Current state | Next step |
 | --- | --- | --- | --- |
@@ -45,4 +45,5 @@ are included. Re-run them before sign-off.
 Use [Observability Basics](basic-concepts.md) for signal limits,
 [Dashboards and Usage](dashboards-and-usage.md) for investigation, and
 [Remediation Actions](remediation-actions.md) for the current action model. The
-[STAC Service Path](stac-scenario.md) is the current end-to-end example.
+[STAC Service Path](stac-scenario.md) and
+[Workspace Monitoring](workspace-scenario.md) give service examples.

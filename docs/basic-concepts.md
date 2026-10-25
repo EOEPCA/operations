@@ -1,8 +1,8 @@
 # Observability Basics
 
-The Operations Building Block is about turning platform behaviour into
-something operators can understand and act on. Metrics, logs, alerts, and SLOs
-primarily support **Inspect** and **Investigate** in the
+The Operations Building Block helps operators check platform behaviour and
+respond to service problems. Metrics, logs, alerts, and SLOs primarily support
+**Inspect** and **Investigate** in the
 [operating model](operating-model.md).
 
 ## Observability In Practice
@@ -11,9 +11,9 @@ Observability answers four questions:
 
 | Signal | Main question | Role in the operating model |
 | --- | --- | --- |
-| Metrics | Is the service healthy, fast, or overloaded? | Inspect trends and service quality; investigate likely failure domains |
+| Metrics | Is the service healthy, fast, or overloaded? | Inspect trends and service quality; find affected components |
 | Logs | What exactly happened? | Investigate requests, errors, and component behaviour |
-| Alerts | Does someone need to act now? | Turn an Inspect condition into operator attention |
+| Alerts | Does someone need to act now? | Notify the operator of a condition that needs attention |
 | SLOs | Is the service still delivering acceptable quality? | Focus Inspect on user impact and urgency |
 
 ## Metrics
@@ -48,11 +48,13 @@ should:
 - carry enough context to triage
 - avoid firing on every transient spike
 
-This is one reason the Operations BB cares about signal quality, not just signal collection.
+Review alert rules when they produce repeated notifications that need no
+action, or fail to detect a service problem.
 
 ## SLOs
 
-A Service Level Objective (SLO) is a measurable statement of acceptable service quality. Instead of saying "the STAC API should be fast", an operator can say:
+A Service Level Objective (SLO) defines acceptable service quality in measurable
+terms. Examples include:
 
 - 99% of STAC GET requests should complete within 500 ms
 - the API should stay within a defined availability target
@@ -71,7 +73,6 @@ EO platforms can be hard to operate:
 - failures can sit at gateway, application, database, or infrastructure level
 - different teams may own different pieces of the platform
 
-That is why the Operations BB focuses on a shared operating model. It gives
-teams a common language for inspecting service quality, investigating
-degradation, acting safely, verifying recovery, and learning from incidents
-without forcing one rigid implementation everywhere.
+Teams use the operating model to agree how to check service quality,
+investigate problems, approve changes, verify recovery, and review incidents.
+The tools and procedures can differ between services.

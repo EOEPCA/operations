@@ -17,10 +17,11 @@ nav:
       - Deployment Reference:
           - Monitoring Stack: monitoring-stack.md
           - Dashboards and Usage: dashboards-and-usage.md
-          - ServiceMonitors: service-monitors.md
+          - ServiceMonitors and PodMonitors: service-monitors.md
           - Alerting and SLOs: alerting-and-slos.md
       - Scenario:
           - STAC Service Path: stac-scenario.md
+          - Workspace Monitoring: workspace-scenario.md
 
 theme:
   name: material

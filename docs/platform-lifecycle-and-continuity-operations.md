@@ -1,8 +1,8 @@
 # Platform Lifecycle and Continuity Operations
 
 Platform Lifecycle and Continuity Operations owns planned change,
-supportability, recovery readiness, and complete retirement. GitOps supplies a
-strong baseline for desired state, review, deployment history, and drift. It
+supportability, recovery readiness, and complete retirement. GitOps records
+desired state, reviews, deployment history, and differences from Git. It
 does not prove service health, software support, data recovery, or safe
 decommissioning.
 
@@ -25,8 +25,8 @@ cannot replace restore, failure-domain, or retirement exercises.
 that automation is not available or the check needs manual work. The mark does
 not mean that the complete check has passed.
 
-Only commands that returned HTTP 200 and useful evidence during the live review
-are included. Re-run them before sign-off.
+The commands below returned useful results during the previous live review.
+Re-run them before sign-off.
 
 | Sign-off check | Automated part | Current state | Next step |
 | --- | --- | --- | --- |

@@ -1,8 +1,8 @@
 # Operations Building Block
 
-EOEPCA separates platform operations into three disciplines. Each discipline
-uses some of the same cluster, GitOps, monitoring, and incident evidence, but
-it has a different result to prove.
+EOEPCA separates platform operations into three disciplines. They use many of
+the same cluster, GitOps, monitoring, and incident records. Each discipline has
+its own responsibilities and checks.
 
 The pages give a short description of each discipline, show the main deployed
 tools and configuration, and assess each sign-off check.
@@ -15,7 +15,7 @@ tools and configuration, and assess each sign-off check.
 
 A security finding can require a planned release, and that release can cause a
 service incident. The discipline that owns the immediate risk leads the work.
-The other disciplines still own their own result.
+Each team remains responsible for its part of the work.
 
 ## Operator Reference
 
@@ -23,4 +23,6 @@ Use the [Operating Model](operating-model.md) for the Inspect, Investigate,
 Act, Verify, and Learn loop. The [Monitoring Stack](monitoring-stack.md),
 [Dashboards and Usage](dashboards-and-usage.md), and
 [Alerting and SLOs](alerting-and-slos.md) give tool-level detail. The
-[STAC Service Path](stac-scenario.md) applies the loop to one user service.
+[STAC Service Path](stac-scenario.md) applies the loop to a user request.
+[Workspace Monitoring](workspace-scenario.md) shows how to check sessions,
+resource use, and managed data activity.

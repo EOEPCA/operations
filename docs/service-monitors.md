@@ -1,6 +1,7 @@
-# ServiceMonitors
+# ServiceMonitors and PodMonitors
 
-A `ServiceMonitor` is the main way the Prometheus Operator learns what to scrape in Kubernetes.
+A `ServiceMonitor` tells Prometheus Operator which Kubernetes Service exposes
+a metrics endpoint. A `PodMonitor` selects pods directly.
 
 ## Why ServiceMonitors Matter
 
@@ -45,11 +46,24 @@ The live `operations` namespace currently has ServiceMonitors for:
 - kube-prometheus-stack components, including Alertmanager, Grafana, Prometheus, kube-state-metrics, kubelet, and node exporter
 - Loki-related chart-managed metrics
 
-There are no `PodMonitor` objects in `operations`. The only live `PodMonitor` observed in the demo cluster is `infra/pods-by-annotation`.
+## Workspace PodMonitor
+
+The `workspace-managed-data` PodMonitor in `operations` selects `package-r`
+pods across workspace namespaces and scrapes `/metrics`. It was added to
+collect managed data activity as workspace pods are created and removed.
+The workspace provider creates a network policy that permits Prometheus to
+reach the metrics port.
+
+The [workspace scenario](workspace-scenario.md#how-metrics-reach-the-dashboard)
+explains how these metrics and the workspace recording rules supply the
+dashboard. The PodMonitor definition is in
+[`workspace-managed-data.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/monitoring/workspace-managed-data.yaml).
+
+The demo also has the `infra/pods-by-annotation` PodMonitor.
 
 ## Concrete Example: Database Pod
 
-The PostgreSQL database pod in `infra` is a good example of the full pattern:
+The PostgreSQL database pod in `infra` uses the following setup:
 
 - the Crunchy `PostgresCluster` enables the `pgmonitor` exporter
 - the running database pod includes an `exporter` container with a named `exporter` port on `9187`
@@ -61,9 +75,10 @@ Relevant files:
 - [`postgrescluster.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/pgo/parts/postgrescluster.yaml) enables the PostgreSQL monitoring exporter
 - [`servicemonitor-postgres-exporter.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/pgo/parts/servicemonitor-postgres-exporter.yaml) defines the scrape target
 
-Because that pattern is in place, operators can correlate STAC symptoms with database-side signals such as PostgreSQL exporter metrics and `pg_stat_statements`-derived query timing.
+Operators can use these metrics to compare STAC latency with database query
+timing from PostgreSQL exporter and `pg_stat_statements`.
 
-## Metric Quality Matters Too
+## Metric Labels
 
 A scrape target is only useful when its metric labels are stable. APISIX route
 metrics use controlled labels such as route and HTTP method, configured in

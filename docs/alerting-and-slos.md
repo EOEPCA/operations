@@ -1,18 +1,16 @@
 # Alerting and SLOs
 
-Alerting and SLOs are central to **Inspect** in the
-[operating model](operating-model.md). They turn raw telemetry into a clear
-signal that a user-facing service may need operator attention.
+Alerts and SLOs support **Inspect** in the
+[operating model](operating-model.md). They show which service conditions need
+operator attention and help judge the effect on users.
 
 ## Prometheus, Alertmanager, and Keep
 
-The current EOEPCA demo uses a layered model:
+In the EOEPCA demo:
 
 1. Prometheus scrapes metrics and evaluates recording and alerting rules.
 2. Alertmanager groups and routes alerts.
 3. Keep enriches selected alerts so operators can triage them with more context.
-
-This lets each component do the job it is good at.
 
 ## Baseline Alerts
 
@@ -26,18 +24,20 @@ The baseline rules live in [`_rules/baseline-alerts.yaml`](https://github.com/EO
 - replica mismatches
 - persistent volume exhaustion
 
-These rules are useful because they give operators a stable default baseline before service-specific alerting is added.
+Service-specific rules add checks for request quality and application
+behaviour to these platform alerts.
 
-## Why Alertmanager Alone Is Not Enough
+## Alert Context
 
-Alertmanager is very good at routing and grouping alerts, but it does not automatically answer questions such as:
+Alertmanager groups and routes alerts. During investigation, operators also
+need to know:
 
 - which user-facing service is actually at risk?
 - what related signals should I inspect next?
 - is this a gateway problem, an application problem, or a database problem?
 - what mitigation step is likely to help?
 
-That is why the Operations BB also motivates an enrichment layer.
+Keep adds related information to help answer these questions.
 
 ## Keep for Alert Enrichment
 
@@ -47,8 +47,8 @@ In the EOEPCA demo, Keep is integrated through:
 - [`keep-alertmanager-relay.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/keep-alertmanager-relay.yaml)
 - [`app-keep.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/app-keep.yaml)
 
-Selected alerts arrive in Keep with related operational context. This shortens
-the time between "alert fired" and "operator knows what to inspect next".
+Selected alerts arrive in Keep with related service information. Use this
+information to choose which dashboard, log, or dependency to check next.
 
 In the live cluster, the `keep` `AlertmanagerConfig` sends resolved and firing alerts to:
 
@@ -62,19 +62,14 @@ Selected noisy workload alerts are routed to a `null` receiver before the defaul
 
 SLOs focus alerting on user-visible service quality.
 
-Instead of saying:
-
-- alert when CPU is above 80%
-
-an SLO-oriented approach asks:
-
-- is the service still delivering acceptable latency or availability?
-
-That distinction matters. Resource pressure is only important when it threatens service quality.
+A CPU alert can show resource pressure. An SLO checks whether the service
+still meets its latency or availability target. Use resource metrics to
+explain the condition and request checks to judge its effect on users.
 
 ## Burn Rate
 
-Burn rate is a practical way to express urgency. It shows how fast a service is consuming its error budget.
+Burn rate shows how fast a service uses its error budget and helps operators
+judge how soon they need to respond.
 
 For example:
 
@@ -94,7 +89,8 @@ For a 30-day SLO window, sustaining a `14.4` burn rate would use the whole 30-da
 30 days / 14.4 = 2.08 days
 ```
 
-Because the example uses the one-hour burn-rate record, it is intended to catch sharp, urgent degradation. That is more meaningful than a generic infrastructure threshold because it directly connects to service quality.
+The one-hour record detects a rapid increase in slow requests. The six-hour
+record helps detect a problem that persists for longer.
 
 The deployed STAC rules are defined in [`stac-alerts.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/stac-alerts.yaml). The live `stac-alerts` PrometheusRule contains:
 
@@ -106,18 +102,22 @@ The deployed STAC rules are defined in [`stac-alerts.yaml`](https://github.com/E
 
 The alerting rules currently fire on the request-level GET and POST records. The upstream, gateway, and database records are supporting signals used to understand which layer is contributing to the user-visible symptom.
 
-## Why This Fits EO Platforms
+The [STAC dashboard](dashboards-and-usage.md#stac) uses separate proxy and
+backend metrics. Its values can differ from the public-route alert records.
 
-EO platform operators care about service paths such as STAC, not only about whether a pod is alive. SLO-driven alerting helps focus attention on what users and downstream building blocks actually experience.
+## EO Service Alerts
 
-This is the core idea of the Operations BB:
+A healthy pod can still serve slow or failed requests. SLO alerts check the
+quality of service paths such as STAC for users and downstream building blocks.
+
+The alert response uses:
 
 - metrics, synthetics, and SLOs detect a meaningful service symptom
 - Prometheus and Alertmanager evaluate, group, and route the signal
 - Keep enriches the event for investigation
-- supporting metrics and logs help the operator narrow the failure domain
+- supporting metrics and logs help the operator find the affected component
 
-Together, these components perform much of Inspect and prepare Investigate.
+These checks supply the results used during Inspect and Investigate.
 
 ## From Alerting to Remediation
 
@@ -128,9 +128,9 @@ After **Inspect** raises and enriches the incident, a human operator owns
 likely wrong, what remains uncertain, and which mitigation is safe.
 
 Act should then use the
-[library of named remediation actions](remediation-actions.md) currently being
-established. The library turns existing scripts and procedures into trusted
-operational choices while keeping approval and verification explicit.
+[library of named remediation actions](remediation-actions.md), which is still
+in development. Each action will define its checks, approval, execution
+limits, and verification. Existing scripts and procedures can run the actions.
 
 Verify completes the action by checking workload health and the user-facing
 service again. If the same synthetic check or SLO remains unhealthy, the action

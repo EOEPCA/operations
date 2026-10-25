@@ -1,7 +1,7 @@
 # Security Operations
 
-Security Operations owns platform posture, preventive controls, detection,
-security evidence, and response. EOEPCA uses separate controls for workload
+Security Operations covers platform protection, security checks, detection,
+and incident response. EOEPCA uses separate controls for workload
 admission, deployed-state scanning, request authorization, secret and
 certificate handling, and operator evidence.
 
@@ -26,8 +26,8 @@ evidence again before a formal sign-off.
 that automation is not available or the check needs manual work. The mark does
 not mean that the complete check has passed.
 
-Only commands that returned HTTP 200 and useful evidence during the live review
-are included. Re-run them before sign-off.
+The commands below returned useful results during the previous live review.
+Re-run them before sign-off.
 
 | Sign-off check | Automated part | Current state | Next step |
 | --- | --- | --- | --- |
@@ -47,5 +47,5 @@ are included. Re-run them before sign-off.
 
 ## Operator Detail
 
-Use [Dashboards and Usage](dashboards-and-usage.md) for the Kyverno and Trivy
-views. Use [Alerting and SLOs](alerting-and-slos.md) for alert routing and Keep.
+Use [Dashboards and Usage](dashboards-and-usage.md) for the Security Compliance
+dashboard. Use [Alerting and SLOs](alerting-and-slos.md) for alert routing and Keep.
