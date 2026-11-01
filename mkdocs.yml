@@ -22,6 +22,7 @@ nav:
       - Scenario:
           - STAC Service Path: stac-scenario.md
           - Workspace Monitoring: workspace-scenario.md
+          - Kubernetes API and Etcd: control-plane-scenario.md
 
 theme:
   name: material

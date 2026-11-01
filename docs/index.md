@@ -1,11 +1,10 @@
 # Operations Building Block
 
-EOEPCA separates platform operations into three disciplines. They use many of
-the same cluster, GitOps, monitoring, and incident records. Each discipline has
-its own responsibilities and checks.
+These pages describe operations for the `eoepca-demo` cluster: how to check a
+problem, restore a service, and prepare for platform changes. They cover the
+deployed tools and the checks still needed before sign-off.
 
-The pages give a short description of each discipline, show the main deployed
-tools and configuration, and assess each sign-off check.
+The work is divided into three areas:
 
 | Discipline | Main question | EOEPCA page |
 | --- | --- | --- |
@@ -13,16 +12,20 @@ tools and configuration, and assess each sign-off check.
 | Reliability and Remediation Operations | Are user services healthy, and can service be restored safely? | [Reliability and Remediation Operations](reliability-and-remediation-operations.md) |
 | Platform Lifecycle and Continuity Operations | Can the platform be changed, supported, recovered, and retired safely? | [Platform Lifecycle and Continuity Operations](platform-lifecycle-and-continuity-operations.md) |
 
-A security finding can require a planned release, and that release can cause a
-service incident. The discipline that owns the immediate risk leads the work.
-Each team remains responsible for its part of the work.
+A security finding may need a software update, which must then be deployed and
+checked for service failures. In cases like this, the team responsible for the
+immediate risk leads the work, with help from the other teams.
 
 ## Operator Reference
 
-Use the [Operating Model](operating-model.md) for the Inspect, Investigate,
-Act, Verify, and Learn loop. The [Monitoring Stack](monitoring-stack.md),
+The [Operating Model](operating-model.md) explains how an incident moves from
+Inspect to Investigate and Act, with Verify as part of Act and Learn after
+recovery. The [Monitoring Stack](monitoring-stack.md),
 [Dashboards and Usage](dashboards-and-usage.md), and
-[Alerting and SLOs](alerting-and-slos.md) give tool-level detail. The
-[STAC Service Path](stac-scenario.md) applies the loop to a user request.
-[Workspace Monitoring](workspace-scenario.md) shows how to check sessions,
-resource use, and managed data activity.
+[Alerting and SLOs](alerting-and-slos.md) describe the tools used during that work.
+
+For worked examples, follow a slow request in
+[STAC Service Path](stac-scenario.md), or a session or data problem in
+[Workspace Monitoring](workspace-scenario.md).
+[When the Kubernetes API Slows Down](control-plane-scenario.md) covers failures
+that affect several services at once, with Keep alerts and Grafana screenshots.

@@ -8,6 +8,7 @@ Documentation and examples for the EOEPCA Operations Building Block.
 - [Dashboards and usage](docs/dashboards-and-usage.md)
 - [STAC service path](docs/stac-scenario.md)
 - [Workspace monitoring](docs/workspace-scenario.md)
+- [Kubernetes API and etcd](docs/control-plane-scenario.md)
 - [Deployment sources](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/eoepca/operations/parts)
 
 ## Local checks

@@ -1,30 +1,24 @@
 # ServiceMonitors and PodMonitors
 
-A `ServiceMonitor` tells Prometheus Operator which Kubernetes Service exposes
-a metrics endpoint. A `PodMonitor` selects pods directly.
+A metrics endpoint does not become part of monitoring just because a Pod
+exposes it. Prometheus must discover and scrape it. A `ServiceMonitor` selects
+a Kubernetes Service and its metrics port; a `PodMonitor` selects Pods directly.
 
 ## Why ServiceMonitors Matter
 
-A `ServiceMonitor` turns a metrics endpoint into a managed scrape target. Once it exists, Prometheus can:
-
-- scrape the endpoint automatically
-- label the target consistently
-- build dashboards on those metrics
-- alert on them
-- include them in SLO calculations
-
-Without this connection, metrics may exist but Prometheus cannot use them.
+A `ServiceMonitor` gives Prometheus Operator a managed target definition,
+including the endpoint and scrape settings. Once selected by Prometheus, that
+target supplies the metrics used by dashboards, alerts, and SLO calculations.
 
 ## Why the Operations BB Uses Them
 
-The Operations BB uses `ServiceMonitor` resources instead of hand-written
-scrape settings. This is easier to manage across teams and services. A
-component with a stable metrics endpoint and its own `ServiceMonitor` is easier
-to add to the platform baseline.
+The Operations BB keeps target definitions with service configuration rather
+than maintaining a separate list of scrape endpoints. Teams can add a service's
+metrics endpoint and monitor resource together, under the same review.
 
 ## What is Scraped Today
 
-The eoepca-demo cluster currently has ServiceMonitors in:
+In `eoepca-demo`, ServiceMonitors are defined in:
 
 - `operations` for the monitoring and alerting stack
 - `ingress-apisix` for APISIX metrics
@@ -42,17 +36,29 @@ Examples from the current deployment:
 The live `operations` namespace currently has ServiceMonitors for:
 
 - Alloy log collection
+- Crossplane core controller metrics
 - Keep OAuth2 proxy metrics
 - kube-prometheus-stack components, including Alertmanager, Grafana, Prometheus, kube-state-metrics, kubelet, and node exporter
 - Loki-related chart-managed metrics
 
+## Crossplane Metrics
+
+The `crossplane-core` ServiceMonitor and `crossplane-providers` PodMonitor in
+`operations` select controllers in `infra`. They collect client request
+counters for the Control-plane dashboard and alert snapshots.
+
+These client counters help identify controller traffic. The API's resource
+breakdown shows which objects were accessed, but cannot identify the caller
+by itself. The monitor definitions are in
+[`crossplane-metrics.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/monitoring/crossplane-metrics.yaml).
+
 ## Workspace PodMonitor
 
 The `workspace-managed-data` PodMonitor in `operations` selects `package-r`
-pods across workspace namespaces and scrapes `/metrics`. It was added to
-collect managed data activity as workspace pods are created and removed.
-The workspace provider creates a network policy that permits Prometheus to
-reach the metrics port.
+pods across workspace namespaces and scrapes `/metrics`. This keeps managed
+data collection in step with workspace Pod creation and removal. The workspace
+provider also creates the network policy that allows Prometheus to reach the
+metrics port.
 
 The [workspace scenario](workspace-scenario.md#how-metrics-reach-the-dashboard)
 explains how these metrics and the workspace recording rules supply the
@@ -63,7 +69,7 @@ The demo also has the `infra/pods-by-annotation` PodMonitor.
 
 ## Concrete Example: Database Pod
 
-The PostgreSQL database pod in `infra` uses the following setup:
+The PostgreSQL database Pod in `infra` shows how the pieces connect:
 
 - the Crunchy `PostgresCluster` enables the `pgmonitor` exporter
 - the running database pod includes an `exporter` container with a named `exporter` port on `9187`
@@ -75,19 +81,18 @@ Relevant files:
 - [`postgrescluster.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/pgo/parts/postgrescluster.yaml) enables the PostgreSQL monitoring exporter
 - [`servicemonitor-postgres-exporter.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/pgo/parts/servicemonitor-postgres-exporter.yaml) defines the scrape target
 
-Operators can use these metrics to compare STAC latency with database query
-timing from PostgreSQL exporter and `pg_stat_statements`.
+This supplies PostgreSQL exporter and `pg_stat_statements` measurements for
+comparison with STAC request latency.
 
 ## Metric Labels
 
-A scrape target is only useful when its metric labels are stable. APISIX route
-metrics use controlled labels such as route and HTTP method, configured in
+Metric labels need a controlled set of values. A label containing every full
+request URL would create too many separate time series. APISIX instead uses
+labels such as route and HTTP method, configured in
 [`infra/apisix/parts/values/apisix-values.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/infra/apisix/parts/values/apisix-values.yaml).
 
-The STAC auth proxy follows the same pattern at application level. Its request
-and latency metrics use bounded operation, method, and status labels, allowing
-operators to distinguish searches and other STAC operations without using full
-URLs as metric labels. The
-[STAC end-to-end example](stac-scenario.md#stac-auth-proxy-metrics) shows how
+The STAC auth proxy uses operation, method, and status labels to distinguish
+searches and other STAC operations without full request URLs. The
+[STAC end-to-end example](stac-scenario.md#compare-events-with-the-charts) shows how
 these metrics complement gateway, workload, database, log, and synthetic
 signals.

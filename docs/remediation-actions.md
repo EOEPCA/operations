@@ -1,40 +1,30 @@
 # Remediation Actions
 
-A `RemediationAction` is a named operational procedure with defined targets
-and limits. It connects **Investigate** to **Act**: the operator selects an
-action that can be approved, run consistently, and verified.
-
-The remediation-action library holds these procedures.
+A `RemediationAction` will describe a prepared procedure: when it may help,
+what it can change, and how to check the result. An operator will select and
+approve it after investigating the problem.
 
 !!! info "In development"
 
-    The remediation-action library is still being defined and developed.
-    It is not yet available in the deployed Operations Building Block.
-
-    The current stack already supports much of Inspect and helps operators
-    Investigate. The next step is to add a small action library with execution
-    and verification checks.
-
-    This page describes what the library should do. The API, resource model,
-    and execution design are not yet settled.
+    The library is not deployed. This page describes its intended use;
+    the API, resource model, and execution design are still open.
 
 ## Why Use an Action Library?
 
-During an incident, an operator should not have to assemble commands or work
-out safety rules again. An action library provides prepared procedures with
-known checks and limits. A script, Kubernetes operation, workflow, or API call
-may implement an action. The operator selects the intended outcome from the
-library.
+Preparing a procedure before an incident gives the operator time to review
+its targets, risks, and recovery checks. It could run through a script,
+Kubernetes operation, workflow, or API call. The library will describe the
+required result and the limits that apply, regardless of how the procedure
+runs.
 
-Read-only checks may run automatically. Production changes require human
-approval, operate only on explicit targets and within defined limits, and
-include service-level verification and a retry limit. Destructive,
-data-affecting, or identity and access operations remain outside the ordinary
-library.
+Read-only checks may run automatically. A production change will require human
+approval, explicit targets, execution and retry limits, and a service-level
+recovery check. Destructive changes, changes to data, and identity or access
+operations remain outside the ordinary library.
 
 ## What an Action Needs to Explain
 
-Each action defines:
+Before an action can be used, its procedure must explain:
 
 - its intended outcome and when it may help
 - the permitted services and targets
@@ -45,15 +35,17 @@ Each action defines:
 
 ## The Action Flow
 
-1. **Select:** Investigate identifies a suitable action.
-2. **Check and approve:** Preconditions, target, and approval are confirmed.
-3. **Execute:** The system runs the change within the defined limits.
-4. **Verify:** Technical health and the user-facing outcome are checked.
-5. **Record:** Save the evidence, approval, execution details, and result.
+1. **Select:** The operator chooses an action based on the investigation.
+2. **Check and approve:** The operator confirms the target and preconditions,
+   then approves the change.
+3. **Execute:** The procedure runs within its defined limits.
+4. **Verify:** Health checks and a user-facing request confirm whether the
+   service has recovered.
+5. **Record:** The incident record keeps the evidence, approval, execution
+   details, and result for later review.
 
-If verification fails, the action has not resolved the incident. The response
-returns to Investigate or follows the defined stop, rollback, retry, or
-escalation path.
+If the recovery check fails, the response returns to Investigate or follows
+the procedure's stop, rollback, retry, or escalation instructions.
 
 ## Example: Restart a Stateless Workload
 
@@ -65,6 +57,3 @@ escalation path.
 | Who approves it? | A human operator. |
 | How is it verified? | Replicas become healthy, the external service request succeeds, and relevant SLO signals recover. |
 | What if it fails? | Stop repeated attempts and return to Investigate or escalate. |
-
-The implementation may change without changing what the action means to the
-operator.
