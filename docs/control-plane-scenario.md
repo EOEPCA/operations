@@ -1,18 +1,21 @@
-# When the Kubernetes API Slows Down
+# When Kubernetes API Traffic Rises
 
-Several workspaces stay pending, processing jobs do not start, and controllers
-report errors. When these symptoms start together, the Kubernetes API or its
-database, etcd, may be the shared dependency that needs attention.
+Kyverno, Crossplane and other controllers read and update Kubernetes objects
+as they work. More controller activity can raise API traffic. The control-plane
+charts
+show which resources and clients are busy, and whether errors or etcd latency
+rise with the traffic.
 
-The EOEPCA demo has had API and etcd stalls that stopped controllers from
-renewing their leader leases. Reducing avoidable API traffic reduced load,
-but did not establish the cause of those stalls.
+For this example, we temporarily increased reconciliation in Crossplane's
+Kubernetes provider. API traffic rose from about 88 to more than 220 requests
+per second. `KubeAPIRequestSpike` fired after traffic stayed above the threshold
+for five minutes, and Alertmanager sent it to Keep. API 5xx errors stayed at
+zero. The alert rules stayed unchanged.
 
 ## Review the Alert in Keep
 
 In the [Keep alert feed](https://alerting.develop-v2.eoepca.org/alerts/feed),
-alerts for `kubernetes-control-plane` can help explain why several services
-are affected. Look for alerts around the time the failures started. When you
+look for `KubeAPIRequestSpike` or an etcd latency alert. When you
 take an alert, assign it to yourself and acknowledge it so other operators
 can see that someone is handling it.
 
@@ -26,9 +29,7 @@ to see the saved links and measurements.
 
 [![Keep shows the saved links and API/etcd measurements.](img/control-plane/keep-enrichment.png)](img/control-plane/keep-enrichment.png)
 
-*The screenshots show **Manual Test: API and etcd**, an info alert sent directly
-to Keep on 1 November 2026. This checked enrichment and chart markers without
-causing a platform fault. Delivery through Alertmanager was not part of the test.*
+The screenshot shows the saved measurements for `KubeAPIRequestSpike`.
 
 ## Compare Events with the Charts
 
@@ -42,16 +43,12 @@ firing or resolved notification. Hover over a marker to see its time, status,
 and link back to the alert. These markers come from Keep's event log, which
 Alloy sends to Loki for Grafana to read. The saved measurements stay in Keep.
 
-[![API/etcd charts with Keep events enabled and a test marker open.](img/control-plane/keep-events-on.png)](img/control-plane/keep-events-on.png)
-
-*Keep events on, 17:37–17:42 UTC: the test fired and resolved around 17:39.*
+[![API/etcd charts with Keep events enabled and the traffic alert marker open.](img/control-plane/keep-events-on.png)](img/control-plane/keep-events-on.png)
 
 Turning **Keep events** off gives the same charts without the markers, as
 shown below. This only changes the display; metrics and alert delivery continue.
 
 [![The same API/etcd charts with Keep events disabled.](img/control-plane/keep-events-off.png)](img/control-plane/keep-events-off.png)
-
-*Keep events off, with the same time range and measurements.*
 
 | Signal | What to check |
 | --- | --- |
@@ -69,10 +66,13 @@ markers show when Keep logged the notification, including delivery delay.
 
 ## Check Recovery
 
-After an approved change, retry the failed workspace or processing job. Its
-completion is the user-facing recovery check. API errors and latency should
-also fall, and controllers should resume their work before the incident is
-closed. The alert may resolve before all of these checks pass.
+Returning the provider to its normal settings reduced API traffic. The alert
+resolved when the five-minute request average fell below the threshold.
+
+If workspaces or processing jobs were also affected, retry them before closing
+the incident. Their completion checks that users can work again. API errors
+and latency should also return to normal, and controllers should resume their
+work.
 
 The Keep record should explain what changed, whether it helped, and which
 measurements were missing. If the problem is limited to STAC requests, the

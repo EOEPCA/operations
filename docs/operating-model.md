@@ -90,10 +90,9 @@ in this review. The findings can lead to:
 
 The [STAC example](stac-scenario.md) starts with a slow HTTP request, and the
 [workspace example](workspace-scenario.md) starts with a slow session or failed
-data request. If several services fail together, the
-[control-plane example](control-plane-scenario.md) explains how to look for a
-shared Kubernetes API problem. All three use the same investigation and
-recovery process.
+data request. The [control-plane example](control-plane-scenario.md) follows
+increased controller activity and its effect on the Kubernetes API. All three
+use the same investigation and recovery process.
 
 ## From Investigate to Act
 

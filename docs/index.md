@@ -27,5 +27,5 @@ recovery. The [Monitoring Stack](monitoring-stack.md),
 For worked examples, follow a slow request in
 [STAC Service Path](stac-scenario.md), or a session or data problem in
 [Workspace Monitoring](workspace-scenario.md).
-[When the Kubernetes API Slows Down](control-plane-scenario.md) covers failures
-that affect several services at once, with Keep alerts and Grafana screenshots.
+[When Kubernetes API Traffic Rises](control-plane-scenario.md) follows extra
+controller activity through the API charts, Keep alert, and Grafana markers.

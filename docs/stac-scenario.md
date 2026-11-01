@@ -8,6 +8,11 @@ The demo's public endpoint is <https://eoapi.develop-v2.eoepca.org/stac>.
 The target is 99% of GET and POST requests within 500 ms. A burn-rate alert
 fires when the share of slow requests is too high.
 
+For this example, we increased the synthetic STAC checker from two to 40
+replicas. More requests reached the public endpoint, latency rose, and the
+GET and POST critical alerts fired. Alertmanager sent them to Keep through
+the normal alert route. The alert rules stayed unchanged.
+
 ## Review the Alert in Keep
 
 In the [Keep alert feed](https://alerting.develop-v2.eoepca.org/alerts/feed),
@@ -25,9 +30,8 @@ to see the saved links and measurements.
 
 [![Keep shows the saved links and STAC request-path measurements.](img/stac/keep-enrichment.png)](img/stac/keep-enrichment.png)
 
-*The screenshots show **Manual Test: STAC**, an info alert sent directly to Keep
-on 1 November 2026. This checked enrichment and chart markers without causing
-a service fault. Delivery through Alertmanager was not part of the test.*
+The screenshot shows the GET alert with its saved measurements. Keep also
+received the POST alert from the same load test.
 
 ## Compare Events with the Charts
 
@@ -41,16 +45,12 @@ firing or resolved notification. Hover over a marker to see its time, status,
 and link back to the alert. These markers come from Keep's event log, which
 Alloy sends to Loki for Grafana to read. The saved measurements stay in Keep.
 
-[![STAC ingress charts with Keep events enabled and a test marker open.](img/stac/keep-events-on.png)](img/stac/keep-events-on.png)
-
-*Keep events on, 17:37–17:42 UTC: the test fired and resolved around 17:39.*
+[![STAC ingress charts with Keep events enabled and an alert marker open.](img/stac/keep-events-on.png)](img/stac/keep-events-on.png)
 
 Turning **Keep events** off gives the same charts without the markers, as
 shown below. This only changes the display; metrics and alert delivery continue.
 
 [![The same STAC ingress charts with Keep events disabled.](img/stac/keep-events-off.png)](img/stac/keep-events-off.png)
-
-*Keep events off, with the same time range and measurements.*
 
 | Signal | What to check |
 | --- | --- |
@@ -73,6 +73,10 @@ a collection check before it can support a conclusion. Marker times include
 notification delay.
 
 ## Check Recovery
+
+We returned the checker to two replicas after the alerts fired. Traffic and
+latency fell, but the alerts stayed firing because their one-hour window
+still included the slow requests.
 
 After an approved change, repeat the user's search through the public endpoint.
 Successful requests, including the synthetic checks, and lower errors and
