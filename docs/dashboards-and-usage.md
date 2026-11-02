@@ -9,9 +9,8 @@ the time range set to include the first symptom and any recent change.
 The dashboards are generated as ConfigMaps under [`argocd/eoepca/operations/parts/_dashboards`](https://github.com/EOEPCA/eoepca-plus/tree/deploy-develop/argocd/eoepca/operations/parts/_dashboards) and labeled with `grafana_dashboard: "1"`.
 
 Grafana loads them automatically, so no manual import is needed. Each dashboard
-has one tag: `baseline`, `data-access`, `compliance`, or `workspace`. Public links
-are set in the manifests, and stable dashboard IDs preserve bookmarks and alert
-links. The
+has the `baseline` tag. Public links are set in the manifests, and stable
+dashboard IDs preserve bookmarks and alert links. The
 [configuration reference](alerting-and-slos.md#shared-configuration) explains
 how Keep uses those links.
 
@@ -22,51 +21,54 @@ The live `operations` namespace contains dashboard ConfigMaps for:
 - `curated-k8s-resources-node`
 - `curated-k8s-resources-pod`
 - `curated-control-plane`
+- `curated-crossplane`
 - `curated-security-compliance`
 - `curated-stac-slo`
 - `workspaces-overview`
 
-The Security Compliance dashboard combines Kyverno policy results and Trivy
+The Compliance dashboard combines Kyverno policy results and Trivy
 scan findings. It replaces the separate policy-audit and Trivy dashboards.
 
 ## Current Dashboards
 
-### Prometheus / Overview
+<span id="prometheus-overview"></span>
 
-Source: [`prometheus-overview.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/prometheus-overview.json)
+### Prometheus
+
+Source: [`prometheus.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/prometheus.json)
 
 When monitoring data is missing or looks wrong, this dashboard helps check
 Prometheus itself. It shows target discovery and sync, scrape failures,
 appended samples, query rate, and storage state.
 
-### Kubernetes / Cluster
+### Kubernetes Cluster
 
-Source: [`k8s-resources-cluster.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/k8s-resources-cluster.json)
+Source: [`kubernetes-cluster.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/kubernetes-cluster.json)
 
 This dashboard compares namespaces by CPU and memory use, requested and
 limited capacity, and network and storage activity. It helps locate an affected
 namespace when the report does not yet identify a workload.
 
-### Kubernetes / Pods
+### Kubernetes Pods
 
-Source: [`k8s-resources-pod.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/k8s-resources-pod.json)
+Source: [`kubernetes-pods.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/kubernetes-pods.json)
 
 Once the namespace is known, the Pod dashboard shows container CPU use and
 throttling, memory working set against requests and limits, and network and
 disk activity. These measurements help narrow the investigation to a workload
 or container.
 
-### Kubernetes / Nodes
+### Kubernetes Nodes
 
-Source: [`k8s-resources-node.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/k8s-resources-node.json)
+Source: [`kubernetes-nodes.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/kubernetes-nodes.json)
 
 Node capacity and scheduling pressure can explain why workloads do not start
 or run slowly. This dashboard is also useful when several affected workloads
 share a node.
 
-### Kubernetes / API and etcd
+### Kubernetes API and etcd
 
-Source: [`control-plane.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/control-plane.json)
+Source: [`kubernetes-api-and-etcd.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/kubernetes-api-and-etcd.json)
 
 The [demo dashboard](https://monitoring.develop-v2.eoepca.org/d/eoepca-control-plane)
 shows API traffic against its earlier baseline, API errors, availability, and
@@ -79,9 +81,24 @@ compared over the same time range before attributing load to a controller. The
 [control-plane scenario](control-plane-scenario.md) explains the investigation
 and the links between Keep alerts and Grafana chart markers.
 
+### Crossplane Reconciliation
+
+Source: [`crossplane-reconciliation.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/crossplane-reconciliation.json)
+
+The [demo dashboard](https://monitoring.develop-v2.eoepca.org/d/eoepca-crossplane)
+shows reconciliation rates and p99 duration for Datalab and Storage composition
+controllers and provider managed-resource controllers. Error panels show the
+total for the selected period and errors per minute. The **Provider** selector
+filters provider charts. CRD gate controllers are excluded.
+
+Rates and p99 duration use five-minute windows. Composition counts include
+periodic checks and runs triggered by watched changes. They combine all
+resources of each type; they do not identify an individual workspace or the
+trigger for a run. Successful scheduled requeues are not errors.
+
 ### STAC
 
-Source: [`stac-slo.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/stac-slo.json)
+Source: [`stac.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/stac.json)
 
 The **STAC** dashboard follows the request path from APISIX ingress to
 `stac-auth-proxy` and `eoapi-stac`. The ingress section shows public request and
@@ -100,9 +117,11 @@ Periods without traffic show no data. Proxy and backend counts include some
 of the same requests, so adding them would count requests more than once.
 The alert rules measure the public APISIX route.
 
-### Security Compliance
+<span id="security-compliance"></span>
 
-Source: [`security-compliance.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/security-compliance.json)
+### Compliance
+
+Source: [`compliance.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/compliance.json)
 
 This dashboard brings Kyverno policy results together with Trivy vulnerability,
 exposed-secret, configuration, RBAC, and compliance findings. Critical findings
@@ -128,7 +147,7 @@ a missing scan can also leave the total at zero.
 
 ### Workspaces
 
-Source: [`workspaces-overview.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/workspaces-overview.json)
+Source: [`workspaces.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/workspaces.json)
 
 The workspace selector compares running sessions, CPU and memory use, requested
 PVC storage, and owned buckets for one or more workspaces. Each workspace
@@ -145,9 +164,9 @@ recording rules, PodMonitor, and a short investigation example.
 
 ## Keep Events
 
-The API/etcd and STAC dashboards have a **Keep events** control, enabled by
-default. With the incident period selected, it places alert notifications on
-the charts alongside the measurements.
+Both **Kubernetes API and etcd** and **STAC** have a **Keep events** control,
+enabled by default. With the incident period selected, it places alert
+notifications on the charts alongside the measurements.
 
 On time-series charts such as API traffic and etcd latency, blue lines and
 small markers show these events. Hover over a marker for the alert name,
@@ -185,7 +204,8 @@ If Keep history is cleared, older markers can remain after their linked alerts
 have been removed.
 The `dashboard_uid` field identifies the target dashboard; each dashboard's
 query selects it with `${__dashboard.uid}`. The
-Control-plane dashboard also reads the earlier event format to retain history.
+Kubernetes API and etcd dashboard also reads the earlier event format to
+retain history.
 The [alerting reference](alerting-and-slos.md#keep-events-in-grafana) describes
 the workflows that produce these events. Grafana calls the marker query a
 [Loki annotation query](https://grafana.com/docs/grafana/latest/datasources/loki/annotations/).
@@ -194,15 +214,17 @@ the workflows that produce these events. Grafana calls the marker query a
 
 An alert's dashboard link provides a starting point. For a user report without
 an alert, the affected service determines where to start: STAC for searches,
-Workspaces for sessions and managed data, or Security Compliance for scan and
+Workspaces for sessions and managed data, or Compliance for scan and
 policy findings. Missing or inconsistent measurements need a Prometheus
-Overview check first.
+check first.
 
-For a broader resource problem, Kubernetes / Cluster helps locate the
-namespace, then Kubernetes / Pods gives container detail. The Nodes dashboard
+For a broader resource problem, Kubernetes Cluster helps locate the
+namespace, then Kubernetes Pods gives container detail. Kubernetes Nodes
 helps when the affected workloads share a node or show scheduling pressure.
 If workspace creation and several controllers fail together, API/etcd charts
-may reveal a shared dependency problem.
+may reveal a shared dependency problem. Crossplane Reconciliation helps check
+controller rates, duration, and errors when managed resources are slow to become
+ready.
 
 Loki logs and source scan or policy reports provide details behind the charts.
 The [STAC](stac-scenario.md) and [control-plane](control-plane-scenario.md)

@@ -35,7 +35,7 @@ The screenshot shows the saved measurements for `KubeAPIRequestSpike`.
 
 Follow the alert's Grafana link to compare the saved values with the charts
 before and after the notification. If you open the
-[Kubernetes / API and etcd dashboard](https://monitoring.develop-v2.eoepca.org/d/eoepca-control-plane)
+[Kubernetes API and etcd dashboard](https://monitoring.develop-v2.eoepca.org/d/eoepca-control-plane)
 directly, set its time range to the incident period.
 
 **Keep events** is on by default. It adds blue markers when Keep handles a

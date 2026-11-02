@@ -43,6 +43,6 @@ An empty cell means the check needs manual work or has no automation.
 
 ## Operator Detail
 
-The [dashboard guide](dashboards-and-usage.md#security-compliance) explains how
+The [dashboard guide](dashboards-and-usage.md#compliance) explains how
 to review security findings and report age. The
 [alerting reference](alerting-and-slos.md) covers their delivery to Keep.

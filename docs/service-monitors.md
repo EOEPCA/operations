@@ -45,7 +45,7 @@ The live `operations` namespace currently has ServiceMonitors for:
 
 The `crossplane-core` ServiceMonitor and `crossplane-providers` PodMonitor in
 `operations` select controllers in `infra`. They collect client request
-counters for the Control-plane dashboard and alert snapshots.
+counters for the Kubernetes API and etcd dashboard and alert snapshots.
 
 These client counters help identify controller traffic. The API's resource
 breakdown shows which objects were accessed, but cannot identify the caller

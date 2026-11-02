@@ -117,7 +117,7 @@ an investigation timeline rather than a complete audit of response actions.
 
 See [Keep Events](dashboards-and-usage.md#keep-events) for the toggle, marker
 contents, and checks for missing events. The annotation query is maintained in
-[`control-plane.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/control-plane.json).
+[`kubernetes-api-and-etcd.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/kubernetes-api-and-etcd.json).
 
 ### Shared Configuration
 
