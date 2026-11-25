@@ -152,9 +152,8 @@ Source: [`compliance.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-de
 The [demo dashboard](https://monitoring.develop-v2.eoepca.org/d/eoepca-security-compliance-namespace)
 has four columns for Trivy image vulnerabilities, secret findings, workload
 configuration, and access findings. Each has a count, trend, and detail table.
-Namespace and severity selectors filter all three views. ClusterRole findings
-apply to all namespaces. Open the matching Trivy report to confirm the affected
-image or resource before a change.
+Namespace and severity selectors filter all three views. Open the matching
+Trivy report to confirm the affected image or resource before a change.
 
 [![Compliance counts and trends with data-access selected.](img/compliance/overview.png)](img/compliance/overview.png)
 
