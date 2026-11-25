@@ -1,0 +1,442 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1200"
+  height="620"
+  viewBox="0 0 1200 620"
+  role="img"
+  aria-labelledby="title description"
+>
+  <title id="title">EOEPCA Operations operating model</title>
+  <desc id="description">
+    Inspect detects service impact and prepares evidence. Investigate interprets
+    the evidence and selects a mitigation. Act executes an approved action from
+    a bounded library. Verify confirms user-visible recovery and returns failed
+    outcomes to Inspect. Learn improves the next response after recovery.
+  </desc>
+
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow
+        dx="0"
+        dy="8"
+        stdDeviation="10"
+        flood-color="#173042"
+        flood-opacity="0.10"
+      />
+    </filter>
+    <marker
+      id="arrow-blue"
+      markerWidth="12"
+      markerHeight="12"
+      refX="10"
+      refY="6"
+      orient="auto"
+      markerUnits="strokeWidth"
+    >
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#53758a" />
+    </marker>
+    <marker
+      id="arrow-green"
+      markerWidth="12"
+      markerHeight="12"
+      refX="10"
+      refY="6"
+      orient="auto"
+      markerUnits="strokeWidth"
+    >
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#2f8c67" />
+    </marker>
+    <marker
+      id="arrow-green-loop"
+      markerWidth="14"
+      markerHeight="14"
+      refX="12"
+      refY="7"
+      orient="auto"
+      markerUnits="userSpaceOnUse"
+      viewBox="0 0 14 14"
+    >
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#2f8c67" />
+    </marker>
+  </defs>
+
+  <rect
+    x="8"
+    y="8"
+    width="1184"
+    height="604"
+    rx="32"
+    fill="#f6f9fb"
+    stroke="#dce6ec"
+    stroke-width="2"
+  />
+
+  <text
+    x="60"
+    y="54"
+    fill="#496574"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="16"
+    font-weight="700"
+    letter-spacing="2.2"
+  >
+    FROM SERVICE SIGNAL TO VERIFIED RECOVERY
+  </text>
+
+  <!-- Inspect -->
+  <g filter="url(#shadow)">
+    <rect x="60" y="84" width="300" height="174" rx="22" fill="#ffffff" />
+    <rect x="60" y="84" width="300" height="10" rx="5" fill="#167a9f" />
+  </g>
+  <circle cx="104" cy="132" r="22" fill="#e2f3f8" />
+  <path
+    d="M91 133 H98 L103 123 L110 143 L116 130 H121"
+    fill="none"
+    stroke="#167a9f"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <text
+    x="140"
+    y="139"
+    fill="#173042"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="25"
+    font-weight="750"
+  >
+    INSPECT
+  </text>
+  <text
+    x="88"
+    y="184"
+    fill="#294958"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="18"
+    font-weight="600"
+  >
+    Detect service impact
+  </text>
+  <text
+    x="88"
+    y="210"
+    fill="#5b7481"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="16"
+  >
+    Prepare reliable evidence
+  </text>
+  <rect x="88" y="224" width="126" height="23" rx="11.5" fill="#e2f3f8" />
+  <text
+    x="151"
+    y="241"
+    text-anchor="middle"
+    fill="#126783"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="11"
+    font-weight="800"
+    letter-spacing="1"
+  >
+    MACHINE-LED
+  </text>
+
+  <!-- Investigate -->
+  <g filter="url(#shadow)">
+    <rect x="450" y="84" width="300" height="174" rx="22" fill="#ffffff" />
+    <rect x="450" y="84" width="300" height="10" rx="5" fill="#5b58a5" />
+  </g>
+  <circle cx="494" cy="132" r="22" fill="#eeedfb" />
+  <circle
+    cx="490"
+    cy="128"
+    r="8"
+    fill="none"
+    stroke="#5b58a5"
+    stroke-width="3"
+  />
+  <path
+    d="M496 134 L504 142"
+    fill="none"
+    stroke="#5b58a5"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+  <text
+    x="530"
+    y="139"
+    fill="#173042"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="25"
+    font-weight="750"
+  >
+    INVESTIGATE
+  </text>
+  <text
+    x="478"
+    y="184"
+    fill="#294958"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="18"
+    font-weight="600"
+  >
+    Interpret the evidence
+  </text>
+  <text
+    x="478"
+    y="210"
+    fill="#5b7481"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="16"
+  >
+    Select a safe mitigation
+  </text>
+  <rect x="478" y="224" width="174" height="23" rx="11.5" fill="#eeedfb" />
+  <text
+    x="565"
+    y="241"
+    text-anchor="middle"
+    fill="#4d4a91"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="11"
+    font-weight="800"
+    letter-spacing="0.8"
+  >
+    HUMAN-ACCOUNTABLE
+  </text>
+
+  <!-- Act -->
+  <g filter="url(#shadow)">
+    <rect x="840" y="84" width="300" height="174" rx="22" fill="#ffffff" />
+    <rect x="840" y="84" width="300" height="10" rx="5" fill="#d56a2e" />
+  </g>
+  <circle cx="884" cy="132" r="22" fill="#fff0e6" />
+  <path
+    d="M873 132 L881 140 L896 123"
+    fill="none"
+    stroke="#d56a2e"
+    stroke-width="3.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <text
+    x="920"
+    y="139"
+    fill="#173042"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="25"
+    font-weight="750"
+  >
+    ACT
+  </text>
+  <text
+    x="868"
+    y="184"
+    fill="#294958"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="18"
+    font-weight="600"
+  >
+    Execute an approved action
+  </text>
+  <text
+    x="868"
+    y="210"
+    fill="#5b7481"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="16"
+  >
+    Use the bounded action library
+  </text>
+  <rect x="868" y="224" width="170" height="23" rx="11.5" fill="#fff0e6" />
+  <text
+    x="953"
+    y="241"
+    text-anchor="middle"
+    fill="#b45421"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="11"
+    font-weight="800"
+    letter-spacing="0.8"
+  >
+    MACHINE-EXECUTED
+  </text>
+
+  <!-- Forward arrows -->
+  <path
+    d="M375 171 H429"
+    fill="none"
+    stroke="#53758a"
+    stroke-width="3"
+    stroke-linecap="round"
+    marker-end="url(#arrow-blue)"
+  />
+  <path
+    d="M765 171 H819"
+    fill="none"
+    stroke="#53758a"
+    stroke-width="3"
+    stroke-linecap="round"
+    marker-end="url(#arrow-blue)"
+  />
+
+  <!-- Verify -->
+  <path
+    d="M990 270 V298"
+    fill="none"
+    stroke="#d56a2e"
+    stroke-width="3"
+    stroke-linecap="round"
+    marker-end="url(#arrow-blue)"
+  />
+  <g filter="url(#shadow)">
+    <rect
+      x="840"
+      y="310"
+      width="300"
+      height="100"
+      rx="20"
+      fill="#fff9e9"
+      stroke="#e4b84c"
+      stroke-width="2"
+    />
+  </g>
+  <text
+    x="868"
+    y="349"
+    fill="#8f6517"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="18"
+    font-weight="800"
+    letter-spacing="1.4"
+  >
+    VERIFY
+  </text>
+  <text
+    x="868"
+    y="378"
+    fill="#4c5360"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="16"
+    font-weight="600"
+  >
+    Confirm user-visible recovery
+  </text>
+  <text
+    x="868"
+    y="398"
+    fill="#68747d"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="13"
+  >
+    Act is not complete before this check
+  </text>
+
+  <!-- Failed verification loop -->
+  <path
+    d="M824 360 H260 C145 360 116 327 116 279"
+    fill="none"
+    stroke="#53758a"
+    stroke-width="2.5"
+    stroke-dasharray="7 7"
+    stroke-linecap="round"
+    marker-end="url(#arrow-blue)"
+  />
+  <rect x="292" y="345" width="350" height="29" rx="14.5" fill="#f6f9fb" />
+  <text
+    x="467"
+    y="365"
+    text-anchor="middle"
+    fill="#58707d"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="13"
+    font-weight="700"
+  >
+    NOT RECOVERED · INSPECT AGAIN
+  </text>
+
+  <!-- Learn -->
+  <path
+    d="M990 422 C990 452 949 459 918 468"
+    fill="none"
+    stroke="#2f8c67"
+    stroke-width="3"
+    stroke-linecap="round"
+    marker-end="url(#arrow-green)"
+  />
+  <text
+    x="1014"
+    y="448"
+    fill="#2f7c5d"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="13"
+    font-weight="700"
+  >
+    RECOVERED
+  </text>
+  <g filter="url(#shadow)">
+    <rect
+      x="220"
+      y="478"
+      width="720"
+      height="100"
+      rx="22"
+      fill="#eaf7f0"
+      stroke="#6fb594"
+      stroke-width="2"
+    />
+  </g>
+  <circle cx="270" cy="528" r="23" fill="#d1eddf" />
+  <path
+    d="M260 528 C260 520 266 514 274 514 C282 514 288 520 288 528
+       C288 536 282 542 274 542 H260 M260 542 L260 534 H268"
+    fill="none"
+    stroke="#2f8c67"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <text
+    x="312"
+    y="519"
+    fill="#246b50"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="20"
+    font-weight="800"
+    letter-spacing="1.5"
+  >
+    LEARN
+  </text>
+  <text
+    x="312"
+    y="548"
+    fill="#365b4c"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="17"
+    font-weight="600"
+  >
+    Improve signals, guidance, services, and the action library
+  </text>
+  <rect x="758" y="502" width="152" height="25" rx="12.5" fill="#d1eddf" />
+  <text
+    x="834"
+    y="520"
+    text-anchor="middle"
+    fill="#2f765a"
+    font-family="Inter, Segoe UI, Arial, sans-serif"
+    font-size="11"
+    font-weight="800"
+    letter-spacing="0.8"
+  >
+    AFTER RECOVERY
+  </text>
+
+  <!-- Learning feeds the next cycle -->
+  <path
+    d="M205 528 C70 528 36 430 36 270 V210 C36 185 36 171 48 171 H60"
+    fill="none"
+    stroke="#2f8c67"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    marker-end="url(#arrow-green-loop)"
+  />
+</svg>
