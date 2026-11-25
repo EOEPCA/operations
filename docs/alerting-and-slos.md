@@ -18,9 +18,9 @@ Reviewing their alerts together in Keep helps an operator see a possible
 shared failure. Assignment and acknowledgement show who has taken the work,
 so another operator can see its status or take it over.
 
-For API/etcd and STAC alerts, Keep saves measurements when the notification
-arrives. The Grafana link opens the surrounding period for comparison with
-metrics and logs. The [control-plane example](control-plane-scenario.md) shows
+For API/etcd, STAC, and storage alerts, Keep saves measurements when a
+notification arrives. The Grafana link opens the surrounding period for
+comparison with metrics and logs. The [control-plane example](control-plane-scenario.md) shows
 this for API load and etcd latency, including the saved snapshot and chart markers.
 
 ## Baseline Alerts
@@ -33,10 +33,38 @@ The baseline rules live in [`_rules/baseline-alerts.yaml`](https://github.com/EO
 - node pressure and disk exhaustion
 - crash looping pods
 - replica mismatches
-- persistent volume exhaustion
 
 Service-specific rules add checks for request quality and application
 behaviour to these platform alerts.
+
+## Storage Alerts
+
+The [volume rules](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/volume-alerts.yaml)
+check local and block volumes and shared NFS filesystems:
+
+| Condition | Warning | Critical |
+| --- | --- | --- |
+| Free space | Below 15% for 15 minutes | Below 5% for 15 minutes |
+| Free inodes | Below 10% for 15 minutes | Below 3% for 15 minutes |
+| Estimated time to full | Under 24 hours, with less than 40% free, for 30 minutes | Under four hours, with less than 20% free, for 15 minutes |
+
+Estimates use a six-hour trend with at least five hours of samples. Shared NFS
+is checked once per server and shared storage area, rather than per claim.
+Mounted local or block claims without capacity metrics raise
+`PersistentVolumeStatsMissing` after 30 minutes. The baseline node filesystem
+alerts also link to the [volume dashboard](dashboards-and-usage.md#kubernetes-volumes).
+
+The [snapshot rules](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/volume-snapshot-alerts.yaml)
+add two warnings:
+
+- `VolumeSnapshotMonitoringUnavailable`: collection has failed for 15 minutes.
+  Check kube-state-metrics scrape targets, configuration, and list/watch errors.
+- `VolumeSnapshotNeedsAttention`: a creation error, a request pending for more
+  than 30 minutes, or a deletion older than one hour persists for a further
+  15 minutes. Check snapshot status, events, the CSI controller, and capacity.
+
+Missing inventory does not prove that no snapshots exist. Snapshot readiness
+does not replace a restore test.
 
 ## Recording Rules and Alert Rules
 
@@ -69,8 +97,8 @@ The Keep connection and workflows are defined in:
 
 Alerts arrive with the labels and annotations from their rules. Three native
 YAML workflows use these settings to add investigation links, save an optional
-metrics snapshot, and write firing/resolved events. The API/etcd and STAC SLO
-rules specify which dashboard and measurements to use.
+metrics snapshot, and write firing/resolved events. The API/etcd, STAC SLO,
+and storage rules specify which dashboard and measurements to use.
 
 Prometheus records a small set of context measurements every 30 seconds as
 `operations:alert_context`. Keep reads the selected dashboard's measurements
@@ -94,9 +122,9 @@ The remaining alerts use the default Keep receiver.
 
 ## Keep Events in Grafana
 
-The API/etcd and STAC dashboards place firing and resolved notifications next
-to the measurements as chart markers. They reach Grafana through the log
-collection path:
+The API/etcd, STAC, and volume dashboards place firing and resolved
+notifications next to the measurements as chart markers. They reach Grafana
+through the log collection path:
 
 1. When a covered Prometheus alert fires or resolves, the native Keep workflow
    writes a structured event to the backend Pod log.
@@ -121,8 +149,9 @@ contents, and checks for missing events. The annotation query is maintained in
 
 ### Shared Configuration
 
-Each alert selects a context profile with `dashboard: stac` or
-`dashboard: control-plane`. Its `dashboard_url` points to the Grafana dashboard.
+Each alert selects a context profile with `dashboard: stac`,
+`dashboard: control-plane`, or `dashboard: volumes`. Its `dashboard_url` points
+to the Grafana dashboard.
 Keep uses the profile to query measurements and reads the dashboard ID from
 the URL for chart markers. Changing an ID in the dashboard JSON can break
 existing bookmarks and alert links.
@@ -132,8 +161,7 @@ fires. To cover another service, define its context recording rules and set
 the profile and dashboard URL on its alerts. The Keep workflows stay the same.
 
 Public URLs are set in the dashboard links, alert rules, and Keep configuration.
-The [deployment reference](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/alerting/README.md)
-explains the settings and checks. The workflows use built-in Keep providers.
+The workflows use built-in Keep providers.
 MySQL retains alert state across backend Pod replacements; the demo has no
 database backup or restore guarantee.
 

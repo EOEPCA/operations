@@ -35,6 +35,10 @@ An empty cell means the check needs manual work or has no automation.
 
 ## Operator Detail
 
+The [volume dashboard](dashboards-and-usage.md#kubernetes-volumes) shows snapshot
+readiness, creation and deletion problems, and collection health. A ready
+snapshot still needs a restore test to show that the data can be recovered.
+
 The [Operating Model](operating-model.md) explains approval and recovery checks
 for a change. [Alerting and SLOs](alerting-and-slos.md) describes the service
 measurements that help judge whether a rollout has affected users.

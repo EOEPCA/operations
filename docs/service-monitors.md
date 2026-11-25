@@ -52,6 +52,15 @@ breakdown shows which objects were accessed, but cannot identify the caller
 by itself. The monitor definitions are in
 [`crossplane-metrics.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/monitoring/crossplane-metrics.yaml).
 
+## Volume and Snapshot Metrics
+
+Kubelet supplies volume capacity and inode measurements. Kube-state-metrics
+exports claim inventory and the state of `VolumeSnapshot`,
+`VolumeSnapshotContent`, and `VolumeSnapshotClass` resources. Its own metrics
+report collection failures. The [volume dashboard](dashboards-and-usage.md#kubernetes-volumes)
+shows missing capacity metrics and snapshot collection health, so an empty
+panel does not imply unused storage or no snapshots.
+
 ## Workspace PodMonitor
 
 The `workspace-managed-data` PodMonitor in `operations` selects `package-r`

@@ -22,12 +22,13 @@ The live `operations` namespace contains dashboard ConfigMaps for:
 - `curated-k8s-resources-pod`
 - `curated-control-plane`
 - `curated-crossplane`
+- `curated-volumes`
 - `curated-security-compliance`
 - `curated-stac-slo`
 - `workspaces-overview`
 
-The Compliance dashboard combines Kyverno policy results and Trivy
-scan findings. It replaces the separate policy-audit and Trivy dashboards.
+The Compliance dashboard shows Trivy scan findings. Kyverno policy results
+remain available in the source policy reports.
 
 ## Current Dashboards
 
@@ -96,6 +97,31 @@ periodic checks and runs triggered by watched changes. They combine all
 resources of each type; they do not identify an individual workspace or the
 trigger for a run. Successful scheduled requeues are not errors.
 
+### Kubernetes Volumes
+
+Source: [`volumes.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/volumes.json)
+
+The [demo dashboard](https://monitoring.develop-v2.eoepca.org/d/eoepca-volumes)
+shows local and block volume capacity, free space, inodes, and estimated time
+to full. It also identifies mounted claims without capacity metrics, where
+usage alerts cannot run. Network and virtual filesystems are excluded from
+these volume panels.
+
+Separate sections show node filesystems and shared NFS capacity across all
+namespaces. The volume namespace and storage class filters do not limit these
+sections. NFS values describe the shared filesystem; PVC requests are not
+directory quotas. Adding the capacity of its claims would count the same
+space more than once.
+
+Snapshot panels have separate namespace, driver, and class filters. They show
+ready snapshots, pending request age, creation and deletion problems, and
+collection health. Check **Snapshot monitoring** before treating an empty list
+as no snapshots. Snapshot readiness does not measure physical storage use or
+prove that a restore has been tested.
+
+The [storage alert rules](alerting-and-slos.md#storage-alerts) define the limits
+and delays used to detect these conditions.
+
 ### STAC
 
 Source: [`stac.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/stac.json)
@@ -123,27 +149,32 @@ The alert rules measure the public APISIX route.
 
 Source: [`compliance.json`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_dashboards/compliance.json)
 
-This dashboard brings Kyverno policy results together with Trivy vulnerability,
-exposed-secret, configuration, RBAC, and compliance findings. Critical findings
-appear first, followed by action tables for secrets and access, image updates,
-and deployment configuration. Before a change, the matching Trivy or Kyverno
-report is needed to confirm the affected image or resource and the report age.
+The [demo dashboard](https://monitoring.develop-v2.eoepca.org/d/eoepca-security-compliance-namespace)
+has four columns for Trivy image vulnerabilities, secret findings, workload
+configuration, and access findings. Each has a count, trend, and detail table.
+Namespace and severity selectors filter all three views. ClusterRole findings
+apply to all namespaces. Open the matching Trivy report to confirm the affected
+image or resource before a change.
 
-The main views show:
+[![Compliance counts and trends with data-access selected.](img/compliance/overview.png)](img/compliance/overview.png)
 
-- critical findings that need review first
-- high and critical image vulnerabilities and secret findings
-- configuration and access findings
-- failed policy rules and evaluation errors
-- collection errors, report ages, exceptions, and cluster controls
+The namespace filter is `data-access`, with **Critical** severity and 30 days
+of history. ClusterRole findings still apply to all namespaces.
 
-Repeated workload reports for the same image count once per image and
-namespace. Secret findings come from image scans, not scans of live Kubernetes
-Secrets. Cluster controls and ClusterRole findings apply to all namespaces.
+Image findings count once per digest and namespace. Vulnerability totals count
+finding rows, not distinct CVE IDs. Secret findings come from image scans, not
+scans of live Kubernetes Secrets. A falling trend can result from fixes, new
+scan results, workload changes, or missing reports; it does not prove recovery.
 
-The collapsed review section contains scan health and exception details. Zero
-findings are meaningful only when the expected workloads have fresh reports;
-a missing scan can also leave the total at zero.
+Use the panel menu's **View** option to read a detail table at full width.
+The example below shows **Critical** findings in `data-access`.
+
+[![Critical image vulnerability findings in the data-access namespace.](img/compliance/image-vulnerabilities.png)](img/compliance/image-vulnerabilities.png)
+
+The **Scan health** section shows vulnerability reports older than
+26 hours and failed or missing Trivy and kube-state-metrics scrape targets.
+Collection failures leave gaps in the trends. Zero findings do not prove that
+all expected workloads have fresh scans.
 
 ### Workspaces
 
@@ -164,9 +195,9 @@ recording rules, PodMonitor, and a short investigation example.
 
 ## Keep Events
 
-Both **Kubernetes API and etcd** and **STAC** have a **Keep events** control,
-enabled by default. With the incident period selected, it places alert
-notifications on the charts alongside the measurements.
+**Kubernetes API and etcd**, **STAC**, and **Kubernetes Volumes** have a
+**Keep events** control, enabled by default. With the incident period selected,
+it places alert notifications on the charts alongside the measurements.
 
 On time-series charts such as API traffic and etcd latency, blue lines and
 small markers show these events. Hover over a marker for the alert name,
@@ -214,9 +245,9 @@ the workflows that produce these events. Grafana calls the marker query a
 
 An alert's dashboard link provides a starting point. For a user report without
 an alert, the affected service determines where to start: STAC for searches,
-Workspaces for sessions and managed data, or Compliance for scan and
-policy findings. Missing or inconsistent measurements need a Prometheus
-check first.
+Workspaces for sessions and managed data, Kubernetes Volumes for storage and
+snapshots, or Compliance for Trivy findings. Missing or inconsistent
+measurements need a Prometheus check first.
 
 For a broader resource problem, Kubernetes Cluster helps locate the
 namespace, then Kubernetes Pods gives container detail. Kubernetes Nodes

@@ -19,7 +19,7 @@ request counts are not measured per workspace.
 ## How Metrics Reach the Dashboard
 
 The recording rules in
-[`workspace-metrics.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/workspace-metrics.yaml)
+[`workspace-recording-rules.yaml`](https://github.com/EOEPCA/eoepca-plus/blob/deploy-develop/argocd/eoepca/operations/parts/_rules/workspace-recording-rules.yaml)
 link workspace inventory, namespaces, sessions, and pods. The dashboard reuses
 this mapping so that each panel includes the same workspace resources.
 

@@ -73,14 +73,14 @@ The pipeline is defined in [`monitoring/alloy/config.alloy`](https://github.com/
 ### Keep
 
 Keep brings related alerts and their response status into one place. For
-API/etcd and STAC alerts, it also saves measurements and Grafana links, so the
-assigned operator does not have to rebuild the initial queries. This is useful
-when several services fail together, as in the
+API/etcd, STAC, and storage alerts, it also saves measurements and Grafana links,
+so the assigned operator does not have to rebuild the initial queries. This
+is useful when several services fail together, as in the
 [control-plane scenario](control-plane-scenario.md).
 
-For API/etcd and STAC alerts, a shared Keep workflow writes firing and resolved
-events to the backend log. Alloy sends these to Loki. Grafana reads them as
-[chart markers](dashboards-and-usage.md#keep-events), with links back to Keep.
+For API/etcd, STAC, and storage alerts, a shared Keep workflow writes firing
+and resolved events to the backend log. Alloy sends these to Loki. Grafana
+reads them as [chart markers](dashboards-and-usage.md#keep-events), with links back to Keep.
 The alerting reference describes the [event path](alerting-and-slos.md#keep-events-in-grafana).
 
 ## Use the Stack During an Incident
